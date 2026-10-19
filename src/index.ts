@@ -5,6 +5,10 @@ export { AIInput, AITextarea } from './writing.js';
 export type { AIInputProps, AITextareaProps } from './writing.js';
 export { AISearch } from './search.js';
 export type { AISearchProps } from './search.js';
+export { AISelect } from './select.js';
+export type { AISelectProps, AISelectOption } from './select.js';
+export { AIFormFill } from './form-fill.js';
+export type { AIFormFillProps, AIFormField } from './form-fill.js';
 export { useAITask } from './use-ai-task.js';
 export { createFetchTransport } from './transport.js';
 export type {

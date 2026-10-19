@@ -1,12 +1,17 @@
 .aic-field,
-.aic-search {
+.aic-search,
+.aic-select,
+.aic-form-fill {
   font: inherit;
   position: relative;
 }
 .aic-field > input,
 .aic-field > textarea,
 .aic-search input,
-.aic-assistant input {
+.aic-assistant input,
+.aic-select select,
+.aic-select input,
+.aic-form-fill textarea {
   box-sizing: border-box;
   width: 100%;
   border: 1px solid var(--aic-border, #d7dcd5);
@@ -22,12 +27,17 @@
 }
 .aic-field input:focus-visible,
 .aic-field textarea:focus-visible,
-.aic-search input:focus-visible {
+.aic-search input:focus-visible,
+.aic-select select:focus-visible,
+.aic-select input:focus-visible,
+.aic-form-fill textarea:focus-visible {
   outline: 2px solid var(--aic-accent, #37715c);
   outline-offset: 2px;
 }
 .aic-field button,
-.aic-search button {
+.aic-search button,
+.aic-select button,
+.aic-form-fill button {
   font: inherit;
   cursor: pointer;
   border: 1px solid var(--aic-border, #d7dcd5);
@@ -37,7 +47,9 @@
   padding: 7px 11px;
 }
 .aic-field button:disabled,
-.aic-search button:disabled {
+.aic-search button:disabled,
+.aic-select button:disabled,
+.aic-form-fill button:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -90,4 +102,72 @@
 }
 .aic-search button {
   white-space: nowrap;
+}
+
+.aic-select-assistance {
+  margin-top: 16px;
+}
+.aic-select-assistance > label,
+.aic-form-fill > label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.aic-control-row {
+  display: flex;
+  gap: 8px;
+}
+.aic-control-row > input {
+  flex: 1;
+  min-width: 0;
+}
+.aic-control-row > button {
+  flex-shrink: 0;
+}
+.aic-options {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.aic-options li + li {
+  margin-top: 8px;
+}
+.aic-options button {
+  width: 100%;
+  text-align: left;
+}
+.aic-options span {
+  display: block;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.aic-form-fill textarea {
+  resize: vertical;
+  display: block;
+  margin-bottom: 8px;
+}
+.aic-proposal {
+  border: 1px solid var(--aic-border, #d7dcd5);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.aic-proposal p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.aic-proposal dl {
+  margin: 12px 0;
+}
+.aic-proposal dl > div {
+  padding: 8px 0;
+}
+.aic-proposal dt {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.aic-proposal dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }

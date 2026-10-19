@@ -1,6 +1,6 @@
 # AI Components
 
-An early, MIT-licensed React + TypeScript framework for AI-enhanced **everyday UI**: inputs, textareas, and search bars. Bring your own model and server. No chat interface required.
+An early, MIT-licensed React + TypeScript framework for AI-enhanced **everyday UI**: inputs, textareas, search bars, selects, and form autofill. Bring your own model and server. No chat interface required.
 
 ## Run this repository
 
@@ -82,6 +82,71 @@ function validateFilters(data: unknown): Filters {
 
 The component interprets on submit, validates `response.data` through your `parse` function, then calls `onSearch`. It never executes queries or searches your database itself. Zod or another validator can be used as `parse={schema.parse}`. Define the output contract in the prompt and your model adapter's structured-output configuration. `onPlainSearch` handles submits when AI is disabled.
 
+## Semantic select
+
+`AISelect` keeps a native single select (including `name`, `required`, labels, and refs). Its optional assistant matches a description against the options you supply. It sends only enabled options and rejects fabricated or disabled values. Generating suggestions does not change the selection; the user chooses a result.
+
+```tsx
+import { AISelect, type AISelectOption } from '@ai-components/react';
+
+// Keep option arrays stable, e.g. at module scope or with useMemo.
+const departments: AISelectOption[] = [
+  { value: 'support', label: 'Support', description: 'Account and technical help' },
+  { value: 'finance', label: 'Finance', description: 'Invoices and billing' },
+];
+
+<AISelect
+  aria-label="Department"
+  name="department"
+  value={department}
+  onValueChange={setDepartment}
+  options={departments}
+  ai={{ prompt: 'Route this request to the best team.' }}
+/>;
+```
+
+The `select` transport action receives `context.options` and expects `{ text: '', data: { values: ['finance'] } }`. Values are ordered by relevance and deduplicated; an empty array displays a no-match message. Each option needs a unique, nonempty value. Enter in the description field finds options without submitting an enclosing form; Escape dismisses suggestions. With AI disabled, native selection continues to work. This component uses a separate description input and suggestion buttons, not a custom ARIA combobox.
+
+## Reviewable form autofill
+
+`AIFormFill` extracts fields from text the user pastes into its textarea. It does not read the clipboard automatically. The component validates both the model result and the application parser output against a field whitelist, then shows a proposal. Only “Apply values” calls `onApply`; it does not submit the form. Source text, configuration, or field changes invalidate the proposal.
+
+```tsx
+import { AIFormFill, type AIFormField } from '@ai-components/react';
+
+const fields: AIFormField[] = [
+  { name: 'name', label: 'Name' },
+  { name: 'email', label: 'Email' },
+];
+
+type ContactPatch = { name?: string; email?: string };
+
+// Your validator checks field types and constraints. It should return only
+// extracted fields; adding defaults could overwrite existing values.
+function parseContact(data: unknown): ContactPatch {
+  if (!data || typeof data !== 'object') throw new Error('Expected contact values.');
+  const values = data as Record<string, unknown>;
+  const patch: ContactPatch = {};
+  for (const key of ['name', 'email'] as const) {
+    if (!(key in values)) continue;
+    if (typeof values[key] !== 'string') throw new Error('Expected text.');
+    patch[key] = values[key];
+  }
+  return patch;
+}
+
+<AIFormFill
+  fields={fields}
+  parse={parseContact}
+  onApply={(patch) => setContact((current) => ({ ...current, ...patch }))}
+  ai={{ prompt: 'Extract contact details; omit anything missing.' }}
+/>;
+```
+
+The `extract` action receives `context.fields` and expects `{ text: '', data: { name: 'Alex' } }`. Missing fields should be omitted. Use your parser to enforce types, formats, and constraints; the library checks field names, not domain-specific values. All returned fields are reviewed and applied together. `renderValue` customizes proposal display for complex field values. Keep `fields` and `parse` references stable to avoid invalidating a proposal on unrelated parent renders. Both new components inherit provider prompts, context, transport, cancellation, and the AI enabled state.
+
+The playground now includes Semantic select and Form autofill tabs. The mock select recognizes billing, login, and sales keywords; mock extraction recognizes `Name:`, `Email:`, and `Company:` on separate lines. Real semantic matching and extraction require your model adapter.
+
 ## Server-side API keys
 
 Configure your model's key **once in your server environment**. Propagate the endpoint through the React provider, not the secret. Keys must never be placed in `VITE_*` variables or frontend props.
@@ -105,6 +170,8 @@ export const POST = createAIHandler({
     // complete: return ONLY the suffix to append.
     // write/rewrite: return the full proposed draft.
     // search: return { text: '', data: validated structured filters }.
+    // select: return { text: '', data: { values: ['existing-option-value'] } }.
+    // extract: return { text: '', data: { fieldName: 'extracted value' } }.
     return modelClient.generate(request, { signal });
   },
 });
@@ -132,11 +199,11 @@ const { run, cancel, status, error } = useAITask({ prompt: 'Your instructions' }
 const result = await run({ action: 'rewrite', text: draft, instruction: 'Shorten' });
 ```
 
-The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `complete`, `write`, `rewrite`, and `search`. A response always has `text: string`, with optional `data: unknown`. `run` returns `null` on cancellation, disabled AI, or failure; inspect `error` and `status`. `createFetchTransport` accepts custom headers (including an async factory) and an injected fetch implementation.
+The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `complete`, `write`, `rewrite`, `search`, `select`, and `extract`. A response always has `text: string`, with optional `data: unknown`. `run` returns `null` on cancellation, disabled AI, or failure; inspect `error` and `status`. `createFetchTransport` accepts custom headers (including an async factory) and an injected fetch implementation. Existing custom transports need handlers for the two new actions before using the new components. Model instructions describe the output contracts; adapters should enforce them with structured output and backend validation as well.
 
 ## Scope of v0.1
 
-Included: shared providers, headless task lifecycle, input and textarea assistance, typed search validation, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: streaming, true inline ghost text, semantic select, form autofill, caching, model-vendor adapters, or hosted infrastructure.
+Included: shared providers, headless task lifecycle, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
 
 This is an initial framework, not a production-vetted release. Contributions should keep capabilities opt-in, prompts configurable, transports replaceable, and ordinary keyboard behavior intact.
 

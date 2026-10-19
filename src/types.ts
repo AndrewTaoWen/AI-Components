@@ -1,4 +1,5 @@
-export type AIAction = 'complete' | 'write' | 'rewrite' | 'search';
+export const AI_ACTIONS = ['complete', 'write', 'rewrite', 'search', 'select', 'extract'] as const;
+export type AIAction = (typeof AI_ACTIONS)[number];
 export interface AIRequest {
   action: AIAction;
   text: string;
