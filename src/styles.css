@@ -8,6 +8,24 @@
 .aic-wrap {
   flex-wrap: wrap;
 }
+.aic-mapping-rows {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.aic-mapping-rows label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.aic-mapping-rows select {
+  font: inherit;
+  padding: 9px;
+  border: 1px solid var(--aic-border, #d7dcd5);
+  border-radius: 6px;
+}
 .aic-field > input,
 .aic-field > textarea,
 .aic-field > select,

@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AIFieldMapper
+
+`<AIFieldMapper sources={columnNames} targets={targetOptions} value={mappings} onValueChange={setMappings} />` offers reviewed one-to-one field mappings plus manual selects. Source names and target values must be unique. The `extract` action receives `context.mapping` (source headers and enabled targets) and returns `data: { mappings: [{ source, target }] }`. Unknown sources/targets, disabled targets, and duplicate sources or targets are rejected. Applying replaces the mapping list; unmapped columns are omitted. The component does not parse CSVs, upload file rows, transform values, or execute imports. The Field mapper mock uses three fixed sample headers.
+
 ### AIDateInput
 
 Use `<AIDateInput value={date} onValueChange={setDate} referenceDate="2026-10-20T12:00:00Z" timeZone="America/Toronto" />` for native date/time fields plus reviewed interpretation of relative phrases. The value is `{ date: 'YYYY-MM-DD', time?: 'HH:mm', timeZone } | null`. `extract` receives `context.dateInput` and returns that object in `data`. Invalid calendar dates, times, and changes to the requested timezone are rejected. Keep `referenceDate` fixed for a user's interpretation session. The output is local calendar data, not a UTC instant: the app must resolve DST gaps/overlaps and enforce scheduling constraints before saving. The demo uses an explicitly fixed reference and a canned October 23 result, not a general date parser.

@@ -39,6 +39,17 @@ export const demoTransport: AITransport = {
       return { text: '', data: { values: value ? [value] : [] } };
     }
     if (request.action === 'extract') {
+      if (request.context?.mapping)
+        return {
+          text: '',
+          data: {
+            mappings: [
+              { source: 'Client Email', target: 'email' },
+              { source: 'Full Name', target: 'name' },
+              { source: 'Organization', target: 'company' },
+            ],
+          },
+        };
       if (request.context?.dateInput)
         return {
           text: '',
