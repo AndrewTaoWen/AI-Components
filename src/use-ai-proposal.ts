@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAITask } from './use-ai-task.js';
-import type { AIConfig, AIRequest } from './types.js';
+import type { AIConfig, AIRequest, AIResponse } from './types.js';
 
 /** Shared lifecycle for components that review model output before applying it. */
-export function useAIProposal<T>(ai: AIConfig, parse: (data: unknown) => T) {
+export function useAIProposal<T>(ai: AIConfig, parse: (data: unknown, response: AIResponse) => T) {
   const task = useAITask(ai);
   const [proposal, setProposal] = useState<T | null>(null);
   const [validationError, setValidationError] = useState('');
@@ -23,7 +23,7 @@ export function useAIProposal<T>(ai: AIConfig, parse: (data: unknown) => T) {
     const result = await task.run(input);
     if (!result) return;
     try {
-      setProposal(parse(result.data));
+      setProposal(parse(result.data, result));
     } catch (cause) {
       setValidationError(cause instanceof Error ? cause.message : 'Invalid AI proposal.');
     }

@@ -5,6 +5,9 @@
   font: inherit;
   position: relative;
 }
+.aic-wrap {
+  flex-wrap: wrap;
+}
 .aic-field > input,
 .aic-field > textarea,
 .aic-field > select,
