@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AIMultiSelect
+
+Use `<AIMultiSelect value={selected} onValueChange={setSelected} options={options} />` for native checkboxes plus reviewed semantic batch selection. `name` supports normal repeated form values, and `maxSelected` limits manual additions and rejects oversized AI batches. The `select` action receives enabled `context.options`, `context.selected`, `selectionMode: 'multi'`, and nullable `remainingSlots`, then returns `data: { values: ['existing-value'] }`. Suggestions are deduplicated and exclude current choices. Add matches merges the reviewed additions with existing selections; it does not replace them. Disabled and invented options are rejected. With AI disabled, checkboxes continue to work. The mock recognizes design and engineering keywords for the fixed sample team.
+
 ### AIFieldMapper
 
 `<AIFieldMapper sources={columnNames} targets={targetOptions} value={mappings} onValueChange={setMappings} />` offers reviewed one-to-one field mappings plus manual selects. Source names and target values must be unique. The `extract` action receives `context.mapping` (source headers and enabled targets) and returns `data: { mappings: [{ source, target }] }`. Unknown sources/targets, disabled targets, and duplicate sources or targets are rejected. Applying replaces the mapping list; unmapped columns are omitted. The component does not parse CSVs, upload file rows, transform values, or execute imports. The Field mapper mock uses three fixed sample headers.
