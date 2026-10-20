@@ -56,3 +56,12 @@ export type {
   AITransport,
   WritingConfig,
 } from './types.js';
+export { useAISuggestion } from './use-ai-suggestion.js';
+export type {
+  AISuggestionOptions,
+  AISuggestionField,
+  AISuggestionSource,
+  AIChange,
+} from './use-ai-suggestion.js';
+export { AIChangePreview } from './change-preview.js';
+export type { AIChangePreviewProps } from './change-preview.js';
