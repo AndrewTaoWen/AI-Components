@@ -21,7 +21,15 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/styles.css",
+    "./memory": {
+      "types": "./dist/memory.d.ts",
+      "import": "./dist/memory.js"
+    },
+    "./context": {
+      "types": "./dist/context-recipe.d.ts",
+      "import": "./dist/context-recipe.js"
+    }
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",

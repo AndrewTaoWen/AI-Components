@@ -8,6 +8,18 @@
 .aic-wrap {
   flex-wrap: wrap;
 }
+.aic-context-inspector {
+  margin: 18px 0;
+}
+.aic-context-inspector summary {
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.aic-context-inspector pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .aic-checkbox-options {
   border: 0;
   padding: 0;

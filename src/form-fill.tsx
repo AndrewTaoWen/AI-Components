@@ -50,7 +50,18 @@ export function AIFormFill<T extends object>({
     task.cancel();
     setProposal(null);
     setValidationError('');
-  }, [source, fields, parse, available, task.environment, ai.prompt, ai.context, task.cancel]);
+  }, [
+    source,
+    fields,
+    parse,
+    available,
+    task.environment,
+    task.contextVersion,
+    ai.prompt,
+    ai.context,
+    ai.recipe,
+    task.cancel,
+  ]);
 
   async function extractFields() {
     if (!available || !source.trim()) return;
@@ -84,6 +95,7 @@ export function AIFormFill<T extends object>({
 
   function applyProposal() {
     if (!available || proposal === null) return;
+    task.remember(proposal);
     onApply(proposal);
     setProposal(null);
   }

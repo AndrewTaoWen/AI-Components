@@ -91,6 +91,7 @@ export function AIFieldMapper({
           <button
             type="button"
             onClick={() => {
+              task.remember(proposal);
               onValueChange(proposal);
               reset();
             }}
