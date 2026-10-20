@@ -5,6 +5,16 @@
   background: #f6f7f2;
   font-synthesis: none;
 }
+.panel > textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d7dcd5;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  min-height: 90px;
+  margin-bottom: 16px;
+}
 .demo-contact-fields {
   display: grid;
   gap: 12px;
