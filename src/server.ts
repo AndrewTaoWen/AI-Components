@@ -1,4 +1,5 @@
 import type { AIRequest, AIResponse } from './types.js';
+import { AI_ACTIONS } from './types.js';
 export type { AIRequest, AIResponse } from './types.js';
 
 export interface AIHandlerOptions {
@@ -10,7 +11,7 @@ export interface AIHandlerOptions {
   context?: Record<string, unknown>;
   maxBodyBytes?: number;
 }
-const ALLOWED_ACTIONS = new Set(['complete', 'write', 'rewrite', 'search']);
+const ALLOWED_ACTIONS = new Set<string>(AI_ACTIONS);
 const DEFAULT_MAX_BODY_BYTES = 32_768;
 /** Web-standard handler for Next.js routes, workers, and other Fetch runtimes. */
 export function createAIHandler(options: AIHandlerOptions) {

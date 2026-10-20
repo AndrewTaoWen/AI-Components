@@ -5,6 +5,29 @@
   background: #f6f7f2;
   font-synthesis: none;
 }
+.demo-contact-fields {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.demo-contact-fields label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+.demo-contact-fields input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d7dcd5;
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+}
+@media (max-width: 650px) {
+  nav {
+    flex-wrap: wrap;
+  }
+}
 * {
   box-sizing: border-box;
 }

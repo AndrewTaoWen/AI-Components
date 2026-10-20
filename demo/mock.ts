@@ -14,6 +14,25 @@ export const demoTransport: AITransport = {
       if (signal.aborted) abort();
       else signal.addEventListener('abort', abort, { once: true });
     });
+    if (request.action === 'select') {
+      const query = request.text.toLowerCase();
+      const value = /bill|pay|invoice|money/.test(query)
+        ? 'finance'
+        : /login|log in|account|technical/.test(query)
+          ? 'support'
+          : /sales|product|subscription/.test(query)
+            ? 'sales'
+            : null;
+      return { text: '', data: { values: value ? [value] : [] } };
+    }
+    if (request.action === 'extract') {
+      const data: Record<string, string> = {};
+      for (const key of ['name', 'email', 'company']) {
+        const value = request.text.match(new RegExp(`^${key}:\\s*(.+)$`, 'im'))?.[1]?.trim();
+        if (value) data[key] = value;
+      }
+      return { text: '', data };
+    }
     if (request.action === 'search') {
       const lower = request.text.toLowerCase();
       const amount = lower.match(/(?:over|above|more than|>)\s*\$?(\d+)/);

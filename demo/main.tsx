@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AIProvider, AIInput, AITextarea, AISearch, createFetchTransport } from '../src/index.js';
 import { demoTransport } from './mock.js';
+import { FormFillExample, SelectExample } from './extensions.js';
 import '../src/styles.css';
 import './style.css';
 
@@ -46,6 +47,18 @@ const playgroundTabs = {
     label: 'Autocomplete',
     eyebrow: '03 / COMPLETE',
     title: 'Keep your train of thought',
+  },
+  select: {
+    icon: '⌄',
+    label: 'Semantic select',
+    eyebrow: '04 / MATCH',
+    title: 'Find the right option',
+  },
+  fill: {
+    icon: '▤',
+    label: 'Form autofill',
+    eyebrow: '05 / EXTRACT',
+    title: 'Less typing. More reviewing.',
   },
 } as const;
 type PlaygroundTab = keyof typeof playgroundTabs;
@@ -210,6 +223,10 @@ function App() {
                     Pause to see a completion. Tab accepts it. Escape dismisses it.
                   </p>
                 </>
+              ) : tab === 'select' ? (
+                <SelectExample />
+              ) : tab === 'fill' ? (
+                <FormFillExample />
               ) : (
                 <>
                   <p className="description">
