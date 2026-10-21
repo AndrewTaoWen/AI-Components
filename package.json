@@ -35,6 +35,14 @@
     "./persistence": {
       "types": "./dist/memory-persistence.d.ts",
       "import": "./dist/memory-persistence.js"
+    },
+    "./prediction": {
+      "types": "./dist/prediction.d.ts",
+      "import": "./dist/prediction.js"
+    },
+    "./actions": {
+      "types": "./dist/actions.d.ts",
+      "import": "./dist/actions.js"
     }
   },
   "scripts": {

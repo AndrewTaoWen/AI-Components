@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   AIActionReview,
+  AIContextInspector,
+  defineAIPolicy,
+  fromAction,
+  fromMemory,
+  useAIPrediction,
   AIActionRejectedError,
   AIProvider,
   createPersistentAIMemory,
@@ -32,6 +37,35 @@ function checklist(value: AIMemoryValue | undefined): Checklist {
   return initial;
 }
 
+const followupPolicy = defineAIPolicy<Step>({
+  name: 'support.followup',
+  purpose: 'Connect an accepted request to missing follow-up tasks.',
+  actionType: 'followup',
+  borrow: { request: fromAction('request.accepted'), checklist: fromMemory('checklist') },
+  predict({ borrowed }) {
+    const source = borrowed.request as { id: number } | undefined;
+    if (!source) return [];
+    const target = checklist(borrowed.checklist);
+    const additions = tasks.filter((text) => !target.rows.includes(text));
+    if (!additions.length) return [];
+    return [
+      {
+        id: `request-${source.id}-checklist-${target.revision}`,
+        title: 'Prepare the follow-up checklist',
+        description: 'The accepted request has two follow-up steps. Choose which ones to add.',
+        evidence: [
+          { label: 'Accepted request', reference: `action ${source.id}` },
+          { label: 'Follow-up checklist', revision: target.revision },
+        ],
+        steps: additions.map((text, index) => ({
+          id: `task-${index}`,
+          label: text,
+          payload: { text, targetRevision: target.revision, sourceActionId: source.id },
+        })),
+      },
+    ];
+  },
+});
 function Workflow() {
   const environment = useAI();
   const { memory, actions, remember, updateMemory } = useAIMemory();
@@ -92,26 +126,13 @@ function Workflow() {
       undos.current.add(mutationId);
     },
   });
+  const { predictions, errors } = useAIPrediction({ policies: [followupPolicy] });
+  const [inspection, setInspection] = useState<(typeof predictions)[number]['inspection'] | null>(
+    null,
+  );
   function predict() {
-    const source = latestRequest();
-    if (!source) return;
-    const target = currentChecklist();
-    const additions = tasks.filter((text) => !target.rows.includes(text));
-    if (!additions.length) return;
-    action.review({
-      id: `request-${source.id}-checklist-${target.revision}`,
-      title: 'Prepare the follow-up checklist',
-      description: 'The accepted request has two follow-up steps. Choose which ones to add.',
-      evidence: [
-        { label: 'Accepted request', reference: `action ${source.id}` },
-        { label: 'Follow-up checklist', revision: target.revision },
-      ],
-      steps: additions.map((text, index) => ({
-        id: `task-${index}`,
-        label: text,
-        payload: { text, targetRevision: target.revision, sourceActionId: source.id },
-      })),
-    });
+    const next = predictions[0];
+    if (next && action.review(next.proposal)) setInspection(next.inspection);
   }
   const busy = ['validating', 'executing', 'undoing'].includes(action.status);
   return (
@@ -136,7 +157,7 @@ function Workflow() {
         </button>
         <button
           type="button"
-          disabled={!latestRequest() || busy || action.retryPending || !action.enabled}
+          disabled={!predictions.length || busy || action.retryPending || !action.enabled}
           onClick={predict}
         >
           Review next move
@@ -148,6 +169,7 @@ function Workflow() {
           : 'Accept the sample request to provide context.'}
       </p>
       <AIActionReview
+        disabled={!action.enabled}
         proposal={action.proposal}
         onAccept={action.accept}
         onDismiss={action.dismiss}
@@ -157,6 +179,12 @@ function Workflow() {
         retryPending={action.retryPending}
         error={action.error}
       />
+      <AIContextInspector inspection={inspection} />
+      {errors.map((error) => (
+        <p role="alert" key={error.policy}>
+          {error.message}
+        </p>
+      ))}
       <h3>Follow-up checklist</h3>
       <ul aria-label="Follow-up checklist">
         {list.rows.map((text, index) => (

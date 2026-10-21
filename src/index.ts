@@ -1,4 +1,14 @@
 'use client';
+export { defineAIPolicy, evaluateAIPolicies, inspectAIRequest } from './prediction.js';
+export type {
+  AIPredictionPolicy,
+  AIPrediction,
+  AIPredictionResult,
+  AIContextInspection,
+} from './prediction.js';
+export { useAIPrediction } from './use-ai-prediction.js';
+export { AIContextInspector } from './context-inspector.js';
+export type { AIHydratableMemoryStore } from './memory.js';
 export { useAIAction, AIActionRejectedError } from './use-ai-action.js';
 export type {
   AIActionOptions,

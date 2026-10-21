@@ -53,6 +53,8 @@ For persistence adapters and restored history retrieval, see [Durable scoped mem
 
 For app-defined next moves with review, execution, and undo, see [Reviewable application actions](docs/reviewable-actions.md).
 
+For local next-move policies and selected-context inspection, see [Prediction policies](docs/prediction-policies.md).
+
 ## Shared workflow memory
 
 The provider now owns session memory as well as configuration. `useAIMemory()` reads the current scope and offers deliberate updates:

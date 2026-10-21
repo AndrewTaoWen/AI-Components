@@ -71,6 +71,47 @@ export function fromContext(key: string): AIContextSource {
   };
 }
 
+export function resolveAIContext(
+  recipe: AIContextRecipe,
+  input: AITaskInput,
+  environment: {
+    context: Record<string, unknown>;
+    memoryScope: string;
+    snapshot: AIMemorySnapshot;
+  },
+) {
+  const context = environment.context;
+  if (!recipe.name.trim() || !recipe.purpose.trim())
+    throw new Error('A context recipe needs a name and purpose.');
+  const view: AIContextView = {
+    input,
+    context,
+    scope: environment.memoryScope,
+    read: (key, scope = environment.memoryScope) => {
+      const memory = readMemory(environment.snapshot, scope);
+      return Object.hasOwn(memory, key) ? memory[key] : undefined;
+    },
+    history: (type, scope = environment.memoryScope) =>
+      environment.snapshot.actions.filter(
+        (action) => action.scope === scope && (type === undefined || action.type === type),
+      ),
+  };
+  const borrowed: Record<string, unknown> = {};
+  const sources: Record<string, string> = {};
+  for (const [name, source] of Object.entries(recipe.borrow ?? {})) {
+    const value = typeof source === 'function' ? source(view) : source.select(view);
+    if (value !== undefined) {
+      Object.defineProperty(borrowed, name, { value, enumerable: true });
+      Object.defineProperty(sources, name, {
+        value: typeof source === 'function' ? 'custom selector' : source.description,
+        enumerable: true,
+      });
+    }
+  }
+  const recipeView = { ...view, borrowed };
+  return { view: recipeView, sources };
+}
+
 /** Pure request assembly. No model call, memory write, or automatic retrieval occurs. */
 export function prepareAIRequest(
   input: AITaskInput,
@@ -86,34 +127,11 @@ export function prepareAIRequest(
   const prompts = [environment.basePrompt, config.prompt];
   const recipe = config.recipe;
   if (recipe) {
-    if (!recipe.name.trim() || !recipe.purpose.trim())
-      throw new Error('A context recipe needs a name and purpose.');
-    const view: AIContextView = {
-      input,
+    const { view: recipeView, sources } = resolveAIContext(recipe, input, {
+      ...environment,
       context,
-      scope: environment.memoryScope,
-      read: (key, scope = environment.memoryScope) => {
-        const memory = readMemory(environment.snapshot, scope);
-        return Object.hasOwn(memory, key) ? memory[key] : undefined;
-      },
-      history: (type, scope = environment.memoryScope) =>
-        environment.snapshot.actions.filter(
-          (action) => action.scope === scope && (type === undefined || action.type === type),
-        ),
-    };
-    const borrowed: Record<string, unknown> = {};
-    const sources: Record<string, string> = {};
-    for (const [name, source] of Object.entries(recipe.borrow ?? {})) {
-      const value = typeof source === 'function' ? source(view) : source.select(view);
-      if (value !== undefined) {
-        Object.defineProperty(borrowed, name, { value, enumerable: true });
-        Object.defineProperty(sources, name, {
-          value: typeof source === 'function' ? 'custom selector' : source.description,
-          enumerable: true,
-        });
-      }
-    }
-    const recipeView = { ...view, borrowed };
+    });
+    const borrowed = recipeView.borrowed;
     const instructions =
       typeof recipe.instructions === 'function'
         ? recipe.instructions(recipeView)

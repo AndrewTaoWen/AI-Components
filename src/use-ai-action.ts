@@ -3,27 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useAI } from './provider.js';
 import { cloneAIMemoryValue, type AIMemoryStore, type AIMemoryValue } from './memory.js';
 
-/** Only use for an authoritative rejection that guarantees no mutation was committed. */
-export class AIActionRejectedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AIActionRejectedError';
-  }
-}
+export { AIActionRejectedError } from './actions.js';
+export type { AIActionProposal, AIActionEvidence } from './actions.js';
+import {
+  AIActionRejectedError,
+  validateAIActionProposal,
+  type AIActionProposal,
+} from './actions.js';
 
-export interface AIActionEvidence {
-  label: string;
-  reference?: string;
-  revision?: string | number;
-}
-export interface AIActionProposal<T extends AIMemoryValue = AIMemoryValue> {
-  /** Stable identifier for this exact proposal and its source revisions. */
-  id: string;
-  title: string;
-  description?: string;
-  steps: readonly { id: string; label: string; payload: T }[];
-  evidence?: readonly AIActionEvidence[];
-}
 export interface AIActionExecution {
   /** Forward to an idempotent application endpoint; reuse it for retries. */
   mutationId: string;
@@ -58,44 +45,6 @@ interface Attempt<R> {
 }
 function sameBinding(a: Binding, b: Binding) {
   return a.memory === b.memory && a.scope === b.scope && a.type === b.type && a.source === b.source;
-}
-function validateProposal<T extends AIMemoryValue>(
-  input: AIActionProposal<T>,
-): AIActionProposal<T> {
-  const proposal = cloneAIMemoryValue(input) as unknown as AIActionProposal<T>;
-  if (
-    typeof proposal.id !== 'string' ||
-    !proposal.id.trim() ||
-    typeof proposal.title !== 'string' ||
-    !proposal.title.trim() ||
-    (proposal.description !== undefined && typeof proposal.description !== 'string') ||
-    !Array.isArray(proposal.steps) ||
-    !proposal.steps.length ||
-    proposal.steps.some(
-      (step) =>
-        !step ||
-        typeof step.id !== 'string' ||
-        !step.id.trim() ||
-        typeof step.label !== 'string' ||
-        !step.label.trim() ||
-        !Object.hasOwn(step, 'payload'),
-    ) ||
-    new Set(proposal.steps.map((step) => step.id)).size !== proposal.steps.length ||
-    (proposal.evidence !== undefined &&
-      (!Array.isArray(proposal.evidence) ||
-        proposal.evidence.some(
-          (item) =>
-            !item ||
-            typeof item.label !== 'string' ||
-            !item.label.trim() ||
-            (item.reference !== undefined && typeof item.reference !== 'string') ||
-            (item.revision !== undefined &&
-              typeof item.revision !== 'string' &&
-              typeof item.revision !== 'number'),
-        )))
-  )
-    throw new Error('Actions need a unique ID, a title, and unique labeled JSON steps.');
-  return proposal;
 }
 
 /** App-defined predictions enter review explicitly. No execution occurs during generation or render. */
@@ -148,10 +97,10 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
   function record(owner: Binding, outcome: string, data: AIMemoryValue) {
     const mutationId =
       data && typeof data === 'object' ? Reflect.get(data, 'mutationId') : undefined;
-    // A custom subscriber may throw after publication. Retrying the journal must not duplicate
-    // an outcome that the memory store already accepted.
+    const proposalId =
+      data && typeof data === 'object' ? Reflect.get(data, 'proposalId') : undefined;
+    // Authoritative projections can already contain the outcome before the executor returns.
     if (
-      typeof mutationId === 'string' &&
       owner.memory
         .getSnapshot()
         .actions.some(
@@ -160,7 +109,11 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
             event.type === `${owner.type}.${outcome}` &&
             event.data &&
             typeof event.data === 'object' &&
-            Reflect.get(event.data, 'mutationId') === mutationId,
+            ((typeof mutationId === 'string' &&
+              Reflect.get(event.data, 'mutationId') === mutationId) ||
+              (outcome === 'dismissed' &&
+                typeof proposalId === 'string' &&
+                Reflect.get(event.data, 'proposalId') === proposalId)),
         )
     )
       return;
@@ -192,7 +145,7 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
     if (!enabled || busy.current || attempt.current || applied.current?.undoStarted) return false;
     try {
       if (!options.type.trim()) throw new Error('An action type is required.');
-      const next = validateProposal(input);
+      const next = validateAIActionProposal(input);
       if (
         binding.memory
           .getSnapshot()
