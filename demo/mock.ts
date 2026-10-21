@@ -47,6 +47,19 @@ export const demoTransport: AITransport = {
       return { text: '', data };
     }
     if (request.action === 'search') {
+      if (request.context?.fields) {
+        const filters = [];
+        if (/unpaid|paid/i.test(request.text))
+          filters.push({
+            field: 'status',
+            operator: 'equals',
+            value: /unpaid/i.test(request.text) ? 'unpaid' : 'paid',
+          });
+        const amount = request.text.match(/over\s*\$?(\d+)/i);
+        if (amount)
+          filters.push({ field: 'amount', operator: 'greater than', value: Number(amount[1]) });
+        return { text: '', data: { filters } };
+      }
       const lower = request.text.toLowerCase();
       const amount = lower.match(/(?:over|above|more than|>)\s*\$?(\d+)/);
       return {

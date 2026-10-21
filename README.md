@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AIFilterBar
+
+`<AIFilterBar fields={fields} value={filters} onValueChange={setFilters} />` turns text into a reviewed replacement list of AND filters. Declare each field's `name`, `label`, `type` (`text`, `number`, or ISO `date`), and allowed `operators`. The `search` action receives `context.fields` and returns `data: { filters: [{ field, operator, value }] }`. Unknown fields/operators, nonfinite numbers, and invalid calendar dates are rejected. Optional `validate` adds domain constraints. Users can edit operator/value or remove accepted filters even with AI disabled; the component does not execute queries. The Filter bar mock recognizes unpaid/paid and “over $N.”
+
 ### AITagInput
 
 Use `<AITagInput value={tags} onValueChange={setTags} options={allowedTags} text={content} />` to suggest tags from an approved list. Each option has `value`, `label`, and optional `description` / `disabled`. Optional `maxTags` limits additions; `name` emits repeated hidden form fields. Manual addition/removal works with AI disabled. The `select` action receives `context.options` and `context.selected`, and returns `{ text: '', data: { values: ['existing-tag'] } }`. Suggestions are deduplicated, validated, and added only when clicked. Keep option and controlled value references stable. The Tag input playground uses keyword-based mock suggestions.

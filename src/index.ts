@@ -10,6 +10,8 @@ export type { AISelectProps, AISelectOption } from './select.js';
 export { AIFormFill } from './form-fill.js';
 export type { AIFormFillProps, AIFormField } from './form-fill.js';
 export { useAITask } from './use-ai-task.js';
+export { AIFilterBar } from './filter-bar.js';
+export type { AIFilterBarProps, AIFilterField, AIFilter } from './filter-bar.js';
 export { AITagInput } from './tag-input.js';
 export type { AITagInputProps } from './tag-input.js';
 export type { AIOption } from './option-values.js';

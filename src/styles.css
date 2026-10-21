@@ -111,6 +111,27 @@
   gap: 8px;
   padding: 0;
 }
+.aic-filter-list {
+  list-style: none;
+  padding: 0;
+}
+.aic-filter-list li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.aic-filter-list input {
+  width: 120px;
+}
+.aic-filter-list input,
+.aic-filter-list select {
+  font: inherit;
+  border: 1px solid var(--aic-border, #d7dcd5);
+  padding: 8px;
+  border-radius: 6px;
+}
 .aic-chips li {
   display: inline-flex;
   align-items: center;
