@@ -59,7 +59,18 @@ export const AISelect = forwardRef<HTMLSelectElement, AISelectProps>(function AI
     task.cancel();
     setMatches(null);
     setValidationError('');
-  }, [query, value, options, available, task.environment, ai.prompt, ai.context, task.cancel]);
+  }, [
+    query,
+    value,
+    options,
+    available,
+    task.environment,
+    task.contextVersion,
+    ai.prompt,
+    ai.context,
+    ai.recipe,
+    task.cancel,
+  ]);
 
   async function findMatches() {
     if (!available || !query.trim()) return;
@@ -144,7 +155,13 @@ export const AISelect = forwardRef<HTMLSelectElement, AISelectProps>(function AI
                 if (!option) return null;
                 return (
                   <li key={match}>
-                    <button type="button" onClick={() => selectValue(match)}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        task.remember(match);
+                        selectValue(match);
+                      }}
+                    >
                       <strong>{option.label}</strong>
                       {option.description && <span>{option.description}</span>}
                     </button>

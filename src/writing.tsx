@@ -96,11 +96,14 @@ function WritingField({
     ai.minLength,
     ai.prompt,
     ai.context,
+    ai.recipe,
     task.environment,
+    task.contextVersion,
   ]);
 
   function acceptCompletion() {
     if (!suggestion) return;
+    task.remember(value + suggestion);
     onValueChange(value + suggestion);
     setSuggestion('');
     task.cancel();
@@ -124,6 +127,7 @@ function WritingField({
 
   function acceptDraft() {
     if (draft === null) return;
+    task.remember(draft);
     onValueChange(draft);
     setDraft(null);
     setEditorOpen(false);

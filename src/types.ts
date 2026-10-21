@@ -1,3 +1,6 @@
+import type { AIContextRecipe } from './context-recipe.js';
+import type { AIMemoryValue } from './memory.js';
+
 export const AI_ACTIONS = ['complete', 'write', 'rewrite', 'search', 'select', 'extract'] as const;
 export type AIAction = (typeof AI_ACTIONS)[number];
 export interface AIRequest {
@@ -20,6 +23,16 @@ export interface AIConfig {
   enabled?: boolean;
   prompt?: string;
   context?: Record<string, unknown>;
+  recipe?: AIContextRecipe;
+  /** Opt in to recording an accepted result. Generation alone never writes memory. */
+  remember?: {
+    key: string;
+    action?: string;
+    source?: string;
+    scope?: string;
+    /** Project application values (e.g. Dates) into plain JSON memory. */
+    project?(value: unknown): AIMemoryValue;
+  };
 }
 export interface WritingConfig extends AIConfig {
   autocomplete?: boolean;

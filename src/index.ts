@@ -10,6 +10,30 @@ export type { AISelectProps, AISelectOption } from './select.js';
 export { AIFormFill } from './form-fill.js';
 export type { AIFormFillProps, AIFormField } from './form-fill.js';
 export { useAITask } from './use-ai-task.js';
+export { useAIMemory } from './use-ai-memory.js';
+export { createAIMemory } from './memory.js';
+export type {
+  AIMemoryStore,
+  AIMemorySnapshot,
+  AIMemoryAction,
+  AIMemoryActionInput,
+  AIMemoryData,
+  AIMemoryValue,
+} from './memory.js';
+export {
+  defineAIContext,
+  fromMemory,
+  fromAction,
+  fromContext,
+  prepareAIRequest,
+} from './context-recipe.js';
+export type {
+  AIContextRecipe,
+  AIContextSource,
+  AIContextView,
+  AIRecipeView,
+  AITaskInput,
+} from './context-recipe.js';
 export { AIMultiSelect } from './multi-select.js';
 export type { AIMultiSelectProps } from './multi-select.js';
 export { AIFieldMapper } from './field-mapper.js';

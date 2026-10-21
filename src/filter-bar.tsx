@@ -117,6 +117,7 @@ export function AIFilterBar({
           <button
             type="button"
             onClick={() => {
+              task.remember(proposal);
               onValueChange(proposal);
               reset();
             }}

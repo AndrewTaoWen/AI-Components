@@ -48,7 +48,7 @@ export function AITagInput({
   const full = value.length >= maxTags;
   useEffect(reset, [text, value, options, maxTags, disabled, reset]);
 
-  function addTag(tag: string) {
+  function addTag(tag: string, remember = false) {
     if (
       disabled ||
       full ||
@@ -56,6 +56,7 @@ export function AITagInput({
       !options.some((option) => option.value === tag && !option.disabled)
     )
       return;
+    if (remember) task.remember([...value, tag]);
     reset();
     onValueChange([...value, tag]);
   }
@@ -120,7 +121,7 @@ export function AITagInput({
             <p>No new tags found.</p>
           ) : (
             proposal.map((tag) => (
-              <button key={tag} type="button" disabled={full} onClick={() => addTag(tag)}>
+              <button key={tag} type="button" disabled={full} onClick={() => addTag(tag, true)}>
                 {options.find((option) => option.value === tag)?.label ?? tag}
               </button>
             ))

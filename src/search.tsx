@@ -69,6 +69,7 @@ export function AISearch<T>({
       return;
     }
 
+    task.remember(filters);
     onSearch(filters, value);
   }
 

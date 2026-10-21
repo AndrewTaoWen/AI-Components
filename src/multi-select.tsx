@@ -136,6 +136,7 @@ export function AIMultiSelect({
               <button
                 type="button"
                 onClick={() => {
+                  task.remember([...value, ...proposal]);
                   onValueChange([...value, ...proposal]);
                   reset();
                 }}

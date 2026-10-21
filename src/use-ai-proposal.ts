@@ -15,7 +15,16 @@ export function useAIProposal<T>(ai: AIConfig, parse: (data: unknown, response: 
     setValidationError('');
   }, [task.cancel]);
 
-  useEffect(reset, [task.environment, ai.enabled, ai.prompt, ai.context, parse, reset]);
+  useEffect(reset, [
+    task.environment,
+    task.contextVersion,
+    ai.enabled,
+    ai.prompt,
+    ai.context,
+    ai.recipe,
+    parse,
+    reset,
+  ]);
 
   async function propose(input: Omit<AIRequest, 'prompt' | 'context'>) {
     setProposal(null);

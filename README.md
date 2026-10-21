@@ -49,6 +49,131 @@ import '@ai-components/react/styles.css'; // optional defaults
 
 `AIProvider` propagates the transport, default prompt, context, and enabled state. Nested providers inherit the transport, append their prompt, and merge context. Component prompts append to provider prompts; component context overrides inherited context. `enabled={false}` on an ancestor disables AI throughout that subtree.
 
+## Shared workflow memory
+
+The provider now owns session memory as well as configuration. `useAIMemory()` reads the current scope and offers deliberate updates:
+
+```tsx
+import { AIProvider, createAIMemory, useAIMemory } from '@ai-components/react';
+import { useState } from 'react';
+
+function App() {
+  const [memory] = useState(() =>
+    createAIMemory({
+      initial: { shared: { tone: 'friendly' } },
+      maxActions: 50,
+    }),
+  );
+  return (
+    <AIProvider endpoint="/api/ai" memory={memory}>
+      {/* components */}
+    </AIProvider>
+  );
+}
+
+function CustomerStep() {
+  const { remember } = useAIMemory();
+  return (
+    <button
+      onClick={() => {
+        remember(
+          'customer',
+          { name: 'Alex', company: 'Northwind' },
+          {
+            type: 'customer.accepted',
+            source: 'customer-form',
+          },
+        );
+      }}
+    >
+      Use customer
+    </button>
+  );
+}
+```
+
+`updateMemory(patch)` shallow-merges plain JSON state without adding an action. Its updater form receives the current immutable scope. `recordAction({ type, data, source? })` records a deliberate application event without changing state. `remember(key, value, { type, source? })` performs both atomically. `clearMemory()` removes the current scope's data and history. Values are cloned and frozen; cycles, nonfinite numbers, class instances, and unsafe keys are rejected. Optional undefined object properties are omitted. History is bounded across the store (50 actions by default), not per component.
+
+Nested providers share their parent's memory store. `<AIProvider memoryScope="ticket-123">` changes the default scope for its subtree; `useAIMemory('shared')` accesses a named scope explicitly. Separate root providers create separate stores unless given the same store. Scopes organize application state; they are not authorization boundaries. Memory lasts while the provider/store is alive. Persistence across reloads is not built in: use your application backend or implement the `AIMemoryStore` interface for that behavior. Create a store per user/request on the server, never as an SSR singleton.
+
+The `@ai-components/react/memory` and `@ai-components/react/context` subpaths expose the pure store and recipe/request utilities without a React dependency or client directive, for server-side integrations and tests.
+
+### Remember accepted component results
+
+Components opt in through the same `ai` configuration:
+
+```tsx
+<AIFormFill
+  fields={customerFields}
+  parse={parseCustomer}
+  onApply={setCustomer}
+  ai={{
+    remember: {
+      key: 'customer',
+      action: 'customer.accepted',
+      source: 'contact-form',
+    },
+  }}
+/>
+```
+
+The binding records only an accepted AI result: Apply values, Use draft/rewrite/date, a suggested option/tag click, Add matches, or Apply mappings/filters. Generating, discarding, typing, and ordinary manual edits do not automatically write history. Search records validated filters when a submitted AI search invokes `onSearch`. Without a binding, existing components write nothing. Optional `scope` overrides the provider scope; optional `project(value)` converts application-specific values into JSON before remembering them. A missing `action` defaults to `${key}.accepted`. Manual workflows can call the memory hook directly when a user commits an action.
+
+## Prompt recipes: borrow context and anticipate use
+
+Recipes let developers describe the job of a field/hook, choose relevant facts and accepted actions, and explain how its output will be consumed. They work with **every component's `ai.recipe`** and with `useAITask` directly:
+
+```tsx
+import {
+  defineAIContext,
+  fromMemory,
+  fromAction,
+  fromContext,
+  useAITask,
+} from '@ai-components/react';
+
+// Define at module scope (or useMemo) so its identity stays stable.
+const replyRecipe = defineAIContext({
+  name: 'support.reply',
+  purpose: 'Help an agent draft the next customer reply.',
+  borrow: {
+    customer: fromMemory('customer'),
+    lastAcceptedFilters: fromAction('filters.accepted'),
+    product: fromContext('product'),
+    // Custom pure selectors can pick a subset or derive workflow facts.
+    completedSteps: (view) => view.history().map((action) => action.type),
+  },
+  instructions: ({ borrowed }) =>
+    borrowed.customer
+      ? 'Use the accepted customer details. Preserve their meaning.'
+      : 'Keep the reply generic. Do not invent customer details.',
+  anticipate: ({ input }) =>
+    input.action === 'complete'
+      ? 'The agent may press Tab. Return only a suffix to append.'
+      : 'The agent will review a complete replacement before sending it.',
+});
+
+const task = useAITask({
+  recipe: replyRecipe,
+  prompt: 'Keep the tone warm and concise.',
+  remember: { key: 'reply', action: 'reply.accepted' },
+});
+
+// Inspecting assembles the exact request but does not call a model or write memory.
+const request = task.prepare({ action: 'rewrite', text: draft });
+const result = await task.run({ action: 'rewrite', text: draft });
+// Headless code explicitly remembers only when the user accepts the result:
+if (result && userAccepted) task.remember(result.text);
+```
+
+`fromMemory(key, scope?)` selects one state key. `fromAction(type, scope?)` selects the latest matching action (including its data, timestamp, scope, and source). `fromContext(key)` borrows a key from the existing provider/component context. Missing sources are omitted. Selectors receive `input`, the merged static `context`, the current `scope`, `read(key, scope?)`, and `history(type?, scope?)`. `instructions` and `anticipate` additionally receive the selected `borrowed` values. Keep selectors pure and return serializable data.
+
+Only selected memory/history enters `context._ai.borrowed`; the whole store is never implicitly sent. The reserved `_ai` namespace also includes the recipe name, source descriptions, and `expectedUse`. Existing static provider/component context continues to be included as before. Base prompt, component prompt, purpose, instructions, and anticipated use are assembled in that order. The original action-specific `instruction` remains a separate request field so adapters can honor output contracts. Model adapters must include the request context when constructing their model messages.
+
+`anticipate` is a developer-authored planning function, not an autonomous action or a separate predictive-model call. It can use past actions and current input to describe the likely next step. Actual interaction remains under application/user control. Changing borrowed context cancels an in-flight request and invalidates reviewed proposals; unrelated memory updates leave them intact. Changes to provider configuration still invalidate requests as before. Selector failures appear in the task error state without sending a partial request.
+
+The **Workflow memory** playground demonstrates accepting customer details in one component, borrowing them in a separate writing control, and inspecting the assembled request. It uses deterministic mocks and a named demo scope.
+
 Inputs are controlled with `value` and `onValueChange`; native attributes and refs pass through. `onChange` and `defaultValue` are intentionally replaced. Custom classes and optional CSS variables (`--aic-accent`, `--aic-border`, `--aic-surface`) let you style them. No styling framework is required.
 
 Autocomplete is opt-in, debounced (600ms default), starts after three characters, and runs only while focused with the caret at the end. Suggestions appear **below the field** in this first release. Tab accepts a visible suggestion; Shift+Tab navigates normally; Escape dismisses it. Composition input suppresses completion. Drafts require an explicit “Use draft” action. Read-only and disabled fields do not generate. Text edits, configuration changes, and unmounts cancel requests; stale responses are ignored even if a custom transport ignores cancellation.
@@ -227,7 +352,7 @@ Attach `<AIRewriteMenu value={text} onValueChange={setText} />` to any controlle
 
 Use `<AITagInput value={tags} onValueChange={setTags} options={allowedTags} text={content} />` to suggest tags from an approved list. Each option has `value`, `label`, and optional `description` / `disabled`. Optional `maxTags` limits additions; `name` emits repeated hidden form fields. Manual addition/removal works with AI disabled. The `select` action receives `context.options` and `context.selected`, and returns `{ text: '', data: { values: ['existing-tag'] } }`. Suggestions are deduplicated, validated, and added only when clicked. Keep option and controlled value references stable. The Tag input playground uses keyword-based mock suggestions.
 
-Included: shared providers, headless task lifecycle, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
+Included: shared providers, scoped session memory, accepted-action history, prompt recipes with selective context borrowing, headless task lifecycle, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: built-in persistence across reloads, streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
 
 This is an initial framework, not a production-vetted release. Contributions should keep capabilities opt-in, prompts configurable, transports replaceable, and ordinary keyboard behavior intact.
 

@@ -72,6 +72,7 @@ export function AIRewriteMenu({
           <button
             type="button"
             onClick={() => {
+              task.remember(proposal);
               onValueChange(proposal);
               reset();
             }}
