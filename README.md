@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AIRewriteMenu
+
+Attach `<AIRewriteMenu value={text} onValueChange={setText} />` to any controlled text field. Native buttons offer Shorten, Clarify, Friendlier, and More formal actions, followed by a preview with Use rewrite / Discard. Pass custom `actions` (`id`, `label`, `instruction`) for translation or application-specific edits. The existing `rewrite` action returns the full replacement in `response.text`. Empty results are rejected; editing the original text invalidates in-flight or reviewed drafts. This is a button group, with ordinary Tab navigation, rather than an ARIA menu. The playground uses a canned mock rewrite.
+
 ### AIFilterBar
 
 `<AIFilterBar fields={fields} value={filters} onValueChange={setFilters} />` turns text into a reviewed replacement list of AND filters. Declare each field's `name`, `label`, `type` (`text`, `number`, or ISO `date`), and allowed `operators`. The `search` action receives `context.fields` and returns `data: { filters: [{ field, operator, value }] }`. Unknown fields/operators, nonfinite numbers, and invalid calendar dates are rejected. Optional `validate` adds domain constraints. Users can edit operator/value or remove accepted filters even with AI disabled; the component does not execute queries. The Filter bar mock recognizes unpaid/paid and “over $N.”
