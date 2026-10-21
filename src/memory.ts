@@ -93,7 +93,7 @@ export function createAIMemory(
       throw new Error('Action source must be text.');
     if (!Number.isSafeInteger(nextId) || nextId >= Number.MAX_SAFE_INTEGER)
       throw new Error('Memory action IDs are exhausted.');
-    const data = cloneMemoryValue(action.data);
+    const data = cloneAIMemoryValue(action.data);
     const timestamp = (options.clock ?? (() => new Date().toISOString()))();
     if (typeof timestamp !== 'string' || !Number.isFinite(Date.parse(timestamp)))
       throw new Error('Memory clocks must return a valid date string.');
@@ -128,7 +128,7 @@ export function createAIMemory(
     remember(scope, key, value, action) {
       validateKey(scope);
       validateKey(key);
-      const data = cloneMemoryValue(value);
+      const data = cloneAIMemoryValue(value);
       const actions = appendAction(scope, { ...action, data });
       publish(
         {
@@ -159,7 +159,7 @@ function validateKey(key: string) {
 }
 
 /** Clone and freeze data so consumers cannot mutate a previously published snapshot. */
-function cloneMemoryValue(value: unknown, ancestors = new Set<object>()): AIMemoryValue {
+export function cloneAIMemoryValue(value: unknown, ancestors = new Set<object>()): AIMemoryValue {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (!value || typeof value !== 'object' || ancestors.has(value))
@@ -173,12 +173,12 @@ function cloneMemoryValue(value: unknown, ancestors = new Set<object>()): AIMemo
     throw new Error('Memory values must be plain JSON data.');
   ancestors.add(value);
   try {
-    if (isArray) return Object.freeze(value.map((item) => cloneMemoryValue(item, ancestors)));
+    if (isArray) return Object.freeze(value.map((item) => cloneAIMemoryValue(item, ancestors)));
     const result: Record<string, AIMemoryValue> = {};
     for (const [key, item] of Object.entries(value)) {
       validateKey(key);
       // Optional object properties are omitted; undefined array values are rejected.
-      if (item !== undefined) result[key] = cloneMemoryValue(item, ancestors);
+      if (item !== undefined) result[key] = cloneAIMemoryValue(item, ancestors);
     }
     return Object.freeze(result);
   } finally {
@@ -187,7 +187,7 @@ function cloneMemoryValue(value: unknown, ancestors = new Set<object>()): AIMemo
 }
 
 function cloneMemoryData(value: unknown): AIMemoryData {
-  const result = cloneMemoryValue(value);
+  const result = cloneAIMemoryValue(value);
   if (!result || typeof result !== 'object' || Array.isArray(result))
     throw new Error('Memory updates must be objects.');
   return result as AIMemoryData;
@@ -222,7 +222,7 @@ export function restoreAIMemorySnapshot(value: unknown): AIMemorySnapshot {
       scope: action.scope,
       type: action.type,
       ...(action.source === undefined ? {} : { source: action.source }),
-      data: cloneMemoryValue(action.data),
+      data: cloneAIMemoryValue(action.data),
       timestamp: action.timestamp,
     });
   });

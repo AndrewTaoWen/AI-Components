@@ -11,7 +11,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "docs/*.md"
+    "docs/*.md",
+    "docs/screenshots/workspace-actions-*.jpg"
   ],
   "exports": {
     ".": {
