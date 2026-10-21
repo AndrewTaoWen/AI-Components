@@ -39,6 +39,11 @@ export const demoTransport: AITransport = {
       return { text: '', data: { values: value ? [value] : [] } };
     }
     if (request.action === 'extract') {
+      if (request.context?.dateInput)
+        return {
+          text: '',
+          data: { date: '2026-10-23', time: '15:00', timeZone: 'America/Toronto' },
+        };
       const data: Record<string, string> = {};
       for (const key of ['name', 'email', 'company']) {
         const value = request.text.match(new RegExp(`^${key}:\\s*(.+)$`, 'im'))?.[1]?.trim();

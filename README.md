@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AIDateInput
+
+Use `<AIDateInput value={date} onValueChange={setDate} referenceDate="2026-10-20T12:00:00Z" timeZone="America/Toronto" />` for native date/time fields plus reviewed interpretation of relative phrases. The value is `{ date: 'YYYY-MM-DD', time?: 'HH:mm', timeZone } | null`. `extract` receives `context.dateInput` and returns that object in `data`. Invalid calendar dates, times, and changes to the requested timezone are rejected. Keep `referenceDate` fixed for a user's interpretation session. The output is local calendar data, not a UTC instant: the app must resolve DST gaps/overlaps and enforce scheduling constraints before saving. The demo uses an explicitly fixed reference and a canned October 23 result, not a general date parser.
+
 ### AIRewriteMenu
 
 Attach `<AIRewriteMenu value={text} onValueChange={setText} />` to any controlled text field. Native buttons offer Shorten, Clarify, Friendlier, and More formal actions, followed by a preview with Use rewrite / Discard. Pass custom `actions` (`id`, `label`, `instruction`) for translation or application-specific edits. The existing `rewrite` action returns the full replacement in `response.text`. Empty results are rejected; editing the original text invalidates in-flight or reviewed drafts. This is a button group, with ordinary Tab navigation, rather than an ARIA menu. The playground uses a canned mock rewrite.

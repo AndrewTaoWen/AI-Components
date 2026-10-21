@@ -10,6 +10,8 @@ export type { AISelectProps, AISelectOption } from './select.js';
 export { AIFormFill } from './form-fill.js';
 export type { AIFormFillProps, AIFormField } from './form-fill.js';
 export { useAITask } from './use-ai-task.js';
+export { AIDateInput } from './date-input.js';
+export type { AIDateInputProps, AIDateValue } from './date-input.js';
 export { AIRewriteMenu } from './rewrite-menu.js';
 export type { AIRewriteMenuProps, AIRewriteAction } from './rewrite-menu.js';
 export { AIFilterBar } from './filter-bar.js';
