@@ -1,4 +1,13 @@
 'use client';
+export { useAIAction, AIActionRejectedError } from './use-ai-action.js';
+export type {
+  AIActionOptions,
+  AIActionProposal,
+  AIActionEvidence,
+  AIActionExecution,
+} from './use-ai-action.js';
+export { AIActionReview } from './action-review.js';
+export type { AIActionReviewProps } from './action-review.js';
 export {
   createPersistentAIMemory,
   createWebStorageMemoryAdapter,

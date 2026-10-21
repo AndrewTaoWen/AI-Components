@@ -51,6 +51,8 @@ import '@ai-components/react/styles.css'; // optional defaults
 
 For persistence adapters and restored history retrieval, see [Durable scoped memory](docs/durable-memory.md).
 
+For app-defined next moves with review, execution, and undo, see [Reviewable application actions](docs/reviewable-actions.md).
+
 ## Shared workflow memory
 
 The provider now owns session memory as well as configuration. `useAIMemory()` reads the current scope and offers deliberate updates:

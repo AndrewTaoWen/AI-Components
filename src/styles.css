@@ -92,7 +92,10 @@
 .aic-field button,
 .aic-search button,
 .aic-select button,
-.aic-form-fill button {
+.aic-form-fill button,
+.aic-action-lifecycle button,
+.aic-action-buttons button,
+.aic-action-button {
   font: inherit;
   cursor: pointer;
   border: 1px solid var(--aic-border, #d7dcd5);
@@ -104,7 +107,10 @@
 .aic-field button:disabled,
 .aic-search button:disabled,
 .aic-select button:disabled,
-.aic-form-fill button:disabled {
+.aic-form-fill button:disabled,
+.aic-action-lifecycle button:disabled,
+.aic-action-buttons button:disabled,
+.aic-action-button:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -337,4 +343,43 @@
   color: inherit;
   background: var(--aic-surface, #fff);
   padding: 12px 14px;
+}
+
+.aic-action-review {
+  margin-block: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--aic-border, #d9e0d4);
+  border-radius: 0.75rem;
+  background: var(--aic-surface, #f6f8f3);
+}
+.aic-action-review h3 {
+  margin-top: 0;
+}
+.aic-action-review p,
+.aic-action-review ul {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.aic-action-review fieldset {
+  border: 0;
+  padding: 0;
+  margin-block: 1rem;
+}
+.aic-action-review legend {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.aic-action-review label {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  margin-block: 0.65rem;
+}
+.aic-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.aic-action-lifecycle [role='alert'] {
+  color: #a62a2a;
 }
