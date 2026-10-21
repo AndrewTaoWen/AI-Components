@@ -326,6 +326,101 @@ const result = await run({ action: 'rewrite', text: draft, instruction: 'Shorten
 
 The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `complete`, `write`, `rewrite`, `search`, `select`, and `extract`. A response always has `text: string`, with optional `data: unknown`. `run` returns `null` on cancellation, disabled AI, or failure; inspect `error` and `status`. `createFetchTransport` accepts custom headers (including an async factory) and an injected fetch implementation. Existing custom transports need handlers for the two new actions before using the new components. Model instructions describe the output contracts; adapters should enforce them with structured output and backend validation as well.
 
+## Review changes across an existing form
+
+`useAISuggestion` proposes a transaction over explicitly allowed, top-level string fields. Keep
+using ordinary controlled inputs and your own state; `AIChangePreview` supplies an optional
+checkbox review UI with before/after values and recipe source labels.
+
+```tsx
+import { useState } from 'react';
+import {
+  AIChangePreview,
+  defineAIContext,
+  fromMemory,
+  useAISuggestion,
+} from '@ai-components/react';
+
+const fields = [
+  { key: 'category', label: 'Category' },
+  { key: 'reply', label: 'Reply' },
+] as const;
+const ai = {
+  recipe: defineAIContext({
+    name: 'support.triage',
+    purpose: 'Prepare the next step of a support request for human review.',
+    borrow: { customer: fromMemory('customer') },
+    anticipate: () => 'The agent will choose which fields to apply. Nothing is sent.',
+  }),
+  remember: { key: 'triage', action: 'triage.accepted' },
+};
+
+function SupportForm() {
+  const [value, setValue] = useState({ category: '', reply: '' });
+  const suggestion = useAISuggestion({ value, onValueChange: setValue, fields, ai });
+  return (
+    <>
+      <input
+        aria-label="Category"
+        value={value.category}
+        onChange={(event) => setValue({ ...value, category: event.target.value })}
+      />
+      <textarea
+        aria-label="Reply"
+        value={value.reply}
+        onChange={(event) => setValue({ ...value, reply: event.target.value })}
+      />
+      <button
+        disabled={!suggestion.enabled || suggestion.status === 'loading'}
+        onClick={() => suggestion.suggest('Categorize this request and draft a reply.')}
+      >
+        Suggest next steps
+      </button>
+      <AIChangePreview
+        changes={suggestion.changes}
+        sources={suggestion.sources}
+        onAccept={suggestion.accept}
+        onDismiss={suggestion.dismiss}
+        onUndo={suggestion.undo}
+        canUndo={suggestion.canUndo}
+      />
+      <p role="status">{suggestion.error}</p>
+    </>
+  );
+}
+```
+
+Render this form inside an `AIProvider`. Keep configuration outside the component (or memoize it),
+just like other AI controls.
+
+The transport receives an `extract` request whose text contains the allowed fields and their current
+values; other form fields are excluded. Return structured `data` in this shape:
+
+```json
+{
+  "changes": [
+    { "field": "category", "value": "Billing", "reason": "The request concerns a charge." }
+  ]
+}
+```
+
+Unknown fields, duplicate fields, non-string values, and malformed output reject the whole proposal.
+No-op changes are omitted. `changes` is `null` before a proposal and `[]` when no changes are needed.
+The source labels identify context supplied by the recipe; they are not proof that a model relied on
+a particular source. Reasons are model-generated explanations.
+
+`accept()` applies all proposed changes; `accept(['category'])` applies only those keys. Applying a
+batch closes the review and discards unchecked changes. `dismiss()` cancels generation and discards
+the proposal. Value, field, configuration, and borrowed-context changes invalidate stale proposals.
+Generating or dismissing never records accepted memory.
+
+`undo()` restores the most recent accepted batch while preserving unrelated edits. It refuses the
+entire undo if an affected field no longer matches its applied value. Only one batch is retained;
+this is a local controlled-state undo, not a rollback of server writes or other callback side effects.
+With `ai.remember`, acceptance stores the resulting form value and undo stores the restored value
+with an `<accepted-action>.undone` action. The memory projection and binding from acceptance are
+retained for undo. Scope/provider or allowed-field changes clear the undo checkpoint.
+
 ## Scope of v0.1
 
 ### AIMultiSelect
@@ -352,7 +447,7 @@ Attach `<AIRewriteMenu value={text} onValueChange={setText} />` to any controlle
 
 Use `<AITagInput value={tags} onValueChange={setTags} options={allowedTags} text={content} />` to suggest tags from an approved list. Each option has `value`, `label`, and optional `description` / `disabled`. Optional `maxTags` limits additions; `name` emits repeated hidden form fields. Manual addition/removal works with AI disabled. The `select` action receives `context.options` and `context.selected`, and returns `{ text: '', data: { values: ['existing-tag'] } }`. Suggestions are deduplicated, validated, and added only when clicked. Keep option and controlled value references stable. The Tag input playground uses keyword-based mock suggestions.
 
-Included: shared providers, scoped session memory, accepted-action history, prompt recipes with selective context borrowing, headless task lifecycle, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: built-in persistence across reloads, streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
+Included: shared providers, scoped session memory, accepted-action history, prompt recipes with selective context borrowing, headless task and suggestion lifecycles, selective change review with undo, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: built-in persistence across reloads, streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
 
 This is an initial framework, not a production-vetted release. Contributions should keep capabilities opt-in, prompts configurable, transports replaceable, and ordinary keyboard behavior intact.
 

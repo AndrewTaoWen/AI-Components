@@ -17,6 +17,31 @@ export const demoTransport: AITransport = {
     const recipeContext = request.context?._ai as
       | { recipe?: string; borrowed?: { customer?: { name?: string; company?: string } } }
       | undefined;
+    if (recipeContext?.recipe === 'support.triage') {
+      const customer = recipeContext.borrowed?.customer;
+      return {
+        text: '',
+        data: {
+          changes: [
+            {
+              field: 'category',
+              value: 'Billing',
+              reason: 'The request concerns a duplicate subscription charge.',
+            },
+            {
+              field: 'priority',
+              value: 'High',
+              reason: 'A duplicate charge needs a timely review.',
+            },
+            {
+              field: 'reply',
+              value: `Hi ${customer?.name ?? 'there'}, we’ll review the duplicate charge and follow up with you.`,
+              reason: 'Acknowledge the issue without promising a refund.',
+            },
+          ],
+        },
+      };
+    }
     if (recipeContext?.recipe === 'support.reply') {
       const customer = recipeContext.borrowed?.customer;
       return {

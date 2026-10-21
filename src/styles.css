@@ -265,3 +265,76 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
+
+.aic-change-fields {
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  min-width: 0;
+}
+.aic-change-fields legend {
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.aic-change-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--aic-border, #d7dcd5);
+}
+.aic-change-row > input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.aic-change-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.aic-change-row strong,
+.aic-change-row small,
+.aic-change-before,
+.aic-change-after {
+  display: block;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.aic-change-before {
+  margin-top: 6px;
+  color: #8a4736;
+}
+.aic-change-after {
+  color: var(--aic-accent, #37715c);
+}
+.aic-change-after ins {
+  text-decoration: none;
+}
+.aic-change-caption,
+.aic-change-row small {
+  font-size: 12px;
+}
+.aic-change-row small {
+  margin-top: 6px;
+}
+.aic-change-sources {
+  margin: 12px 0 18px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.aic-change-sources ul {
+  padding-left: 18px;
+}
+.aic-suggestion-input {
+  display: block;
+  margin-bottom: 12px;
+}
+.aic-suggestion-input > input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--aic-border, #d7dcd5);
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--aic-surface, #fff);
+  padding: 12px 14px;
+}
