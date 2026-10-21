@@ -49,6 +49,8 @@ import '@ai-components/react/styles.css'; // optional defaults
 
 `AIProvider` propagates the transport, default prompt, context, and enabled state. Nested providers inherit the transport, append their prompt, and merge context. Component prompts append to provider prompts; component context overrides inherited context. `enabled={false}` on an ancestor disables AI throughout that subtree.
 
+For persistence adapters and restored history retrieval, see [Durable scoped memory](docs/durable-memory.md).
+
 ## Shared workflow memory
 
 The provider now owns session memory as well as configuration. `useAIMemory()` reads the current scope and offers deliberate updates:
@@ -94,7 +96,7 @@ function CustomerStep() {
 
 `updateMemory(patch)` shallow-merges plain JSON state without adding an action. Its updater form receives the current immutable scope. `recordAction({ type, data, source? })` records a deliberate application event without changing state. `remember(key, value, { type, source? })` performs both atomically. `clearMemory()` removes the current scope's data and history. Values are cloned and frozen; cycles, nonfinite numbers, class instances, and unsafe keys are rejected. Optional undefined object properties are omitted. History is bounded across the store (50 actions by default), not per component.
 
-Nested providers share their parent's memory store. `<AIProvider memoryScope="ticket-123">` changes the default scope for its subtree; `useAIMemory('shared')` accesses a named scope explicitly. Separate root providers create separate stores unless given the same store. Scopes organize application state; they are not authorization boundaries. Memory lasts while the provider/store is alive. Persistence across reloads is not built in: use your application backend or implement the `AIMemoryStore` interface for that behavior. Create a store per user/request on the server, never as an SSR singleton.
+Nested providers share their parent's memory store. `<AIProvider memoryScope="ticket-123">` changes the default scope for its subtree; `useAIMemory('shared')` accesses a named scope explicitly. Separate root providers create separate stores unless given the same store. Scopes organize application state; they are not authorization boundaries. Memory lasts while the provider/store is alive. Persistence across reloads is opt-in with `createPersistentAIMemory` or an application-owned `AIMemoryStore`; see the durable memory guide. Create a store per user/request on the server, never as an SSR singleton.
 
 The `@ai-components/react/memory` and `@ai-components/react/context` subpaths expose the pure store and recipe/request utilities without a React dependency or client directive, for server-side integrations and tests.
 

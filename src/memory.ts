@@ -18,6 +18,8 @@ export interface AIMemoryAction {
 export interface AIMemorySnapshot {
   readonly scopes: Readonly<Record<string, AIMemoryData>>;
   readonly actions: readonly AIMemoryAction[];
+  /** Monotonic across persistence, even after clearing retained history. */
+  readonly nextActionId?: number;
 }
 export interface AIMemoryActionInput {
   type: string;
@@ -52,6 +54,7 @@ export function readMemory(snapshot: AIMemorySnapshot, scope: string): AIMemoryD
 export function createAIMemory(
   options: {
     initial?: Record<string, AIMemoryData>;
+    snapshot?: AIMemorySnapshot;
     maxActions?: number;
     clock?: () => string;
   } = {},
@@ -59,33 +62,48 @@ export function createAIMemory(
   const maxActions = options.maxActions ?? 50;
   if (!Number.isInteger(maxActions) || maxActions < 0)
     throw new Error('maxActions must be a nonnegative integer.');
+  if (options.initial && options.snapshot) throw new Error('Choose initial memory or a snapshot.');
+  const restored = options.snapshot ? restoreAIMemorySnapshot(options.snapshot) : undefined;
   const listeners = new Set<() => void>();
-  let nextId = 1;
+  let nextId = restored?.nextActionId ?? 1;
   const initialScopes: Record<string, AIMemoryData> = {};
-  for (const [scope, data] of Object.entries(options.initial ?? {})) {
+  for (const [scope, data] of Object.entries(restored?.scopes ?? options.initial ?? {})) {
     validateKey(scope);
     initialScopes[scope] = cloneMemoryData(data);
   }
   let snapshot: AIMemorySnapshot = Object.freeze({
     scopes: Object.freeze(initialScopes),
-    actions: Object.freeze([]),
+    actions: Object.freeze(maxActions === 0 ? [] : (restored?.actions ?? []).slice(-maxActions)),
+    nextActionId: nextId,
   });
 
   function publish(scopes: AIMemorySnapshot['scopes'], actions = snapshot.actions) {
-    snapshot = Object.freeze({ scopes: Object.freeze(scopes), actions: Object.freeze(actions) });
+    snapshot = Object.freeze({
+      scopes: Object.freeze(scopes),
+      actions: Object.freeze(actions),
+      nextActionId: nextId,
+    });
     for (const listener of listeners) listener();
   }
   function appendAction(scope: string, action: AIMemoryActionInput): readonly AIMemoryAction[] {
     validateKey(scope);
-    if (!action.type.trim()) throw new Error('An action needs a nonempty type.');
+    if (typeof action.type !== 'string' || !action.type.trim())
+      throw new Error('An action needs a nonempty type.');
+    if (action.source !== undefined && typeof action.source !== 'string')
+      throw new Error('Action source must be text.');
+    if (!Number.isSafeInteger(nextId) || nextId >= Number.MAX_SAFE_INTEGER)
+      throw new Error('Memory action IDs are exhausted.');
     const data = cloneMemoryValue(action.data);
+    const timestamp = (options.clock ?? (() => new Date().toISOString()))();
+    if (typeof timestamp !== 'string' || !Number.isFinite(Date.parse(timestamp)))
+      throw new Error('Memory clocks must return a valid date string.');
     const event: AIMemoryAction = Object.freeze({
       id: nextId++,
       scope,
       type: action.type,
       source: action.source,
       data,
-      timestamp: (options.clock ?? (() => new Date().toISOString()))(),
+      timestamp,
     });
     return maxActions === 0 ? [] : [...snapshot.actions, event].slice(-maxActions);
   }
@@ -173,4 +191,43 @@ function cloneMemoryData(value: unknown): AIMemoryData {
   if (!result || typeof result !== 'object' || Array.isArray(result))
     throw new Error('Memory updates must be objects.');
   return result as AIMemoryData;
+}
+
+/** Validate and defensively clone a checkpoint before making restored state observable. */
+export function restoreAIMemorySnapshot(value: unknown): AIMemorySnapshot {
+  if (!value || typeof value !== 'object') throw new Error('Invalid memory snapshot.');
+  const input = value as AIMemorySnapshot;
+  const scopes = cloneMemoryData(input.scopes) as Readonly<Record<string, AIMemoryData>>;
+  for (const scope of Object.values(scopes)) cloneMemoryData(scope);
+  if (!Array.isArray(input.actions)) throw new Error('Invalid memory action history.');
+  let previousId = 0;
+  const actions = input.actions.map((action): AIMemoryAction => {
+    if (
+      !action ||
+      typeof action !== 'object' ||
+      !Number.isSafeInteger(action.id) ||
+      action.id <= previousId ||
+      typeof action.scope !== 'string' ||
+      typeof action.type !== 'string' ||
+      !action.type.trim() ||
+      (action.source !== undefined && typeof action.source !== 'string') ||
+      typeof action.timestamp !== 'string' ||
+      !Number.isFinite(Date.parse(action.timestamp))
+    )
+      throw new Error('Invalid memory action history.');
+    validateKey(action.scope);
+    previousId = action.id;
+    return Object.freeze({
+      id: action.id,
+      scope: action.scope,
+      type: action.type,
+      ...(action.source === undefined ? {} : { source: action.source }),
+      data: cloneMemoryValue(action.data),
+      timestamp: action.timestamp,
+    });
+  });
+  const nextActionId = input.nextActionId ?? previousId + 1;
+  if (!Number.isSafeInteger(nextActionId) || nextActionId <= previousId || nextActionId < 1)
+    throw new Error('Invalid next memory action ID.');
+  return Object.freeze({ scopes, actions: Object.freeze(actions), nextActionId });
 }

@@ -10,7 +10,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/*.md"
   ],
   "exports": {
     ".": {
@@ -29,6 +30,10 @@
     "./context": {
       "types": "./dist/context-recipe.d.ts",
       "import": "./dist/context-recipe.js"
+    },
+    "./persistence": {
+      "types": "./dist/memory-persistence.d.ts",
+      "import": "./dist/memory-persistence.js"
     }
   },
   "scripts": {

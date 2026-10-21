@@ -51,6 +51,19 @@ export function fromAction(
     select: (view) => view.history(type, scope).at(-1),
   };
 }
+/** Explicit, bounded history retrieval. Other scopes remain excluded unless named. */
+export function fromActions(
+  type: string,
+  options: { scope?: string; limit?: number } = {},
+): AIContextSource<readonly AIMemoryAction[]> {
+  const limit = options.limit ?? 5;
+  if (!type.trim() || !Number.isInteger(limit) || limit < 0)
+    throw new Error('Action retrieval needs a type and a nonnegative integer limit.');
+  return {
+    description: `actions:${options.scope ?? 'current'}.${type} (last ${limit})`,
+    select: (view) => (limit === 0 ? [] : view.history(type, options.scope).slice(-limit)),
+  };
+}
 export function fromContext(key: string): AIContextSource {
   return {
     description: `context:${key}`,

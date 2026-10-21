@@ -1,4 +1,18 @@
 'use client';
+export {
+  createPersistentAIMemory,
+  createWebStorageMemoryAdapter,
+  createAIMemoryCheckpoint,
+  readAIMemoryCheckpoint,
+} from './memory-persistence.js';
+export type {
+  AIMemoryCheckpoint,
+  AIMemoryPersistenceAdapter,
+  AIMemoryPersistenceStatus,
+  AIPersistentMemory,
+} from './memory-persistence.js';
+export { restoreAIMemorySnapshot } from './memory.js';
+export { fromActions } from './context-recipe.js';
 export { AIProvider, useAI } from './provider.js';
 export type { AIProviderProps, AIEnvironment } from './provider.js';
 export { AIInput, AITextarea } from './writing.js';
