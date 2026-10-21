@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { AIProvider, AIInput, AITextarea, AISearch, createFetchTransport } from '../src/index.js';
 import { demoTransport } from './mock.js';
 import { FormFillExample, SelectExample } from './extensions.js';
+import { componentExamples, type ComponentExample } from './examples/registry.js';
 import '../src/styles.css';
 import './style.css';
 
@@ -29,7 +30,7 @@ function parseFilters(data: unknown): Filters {
   return { status, minAmount, customer };
 }
 
-const playgroundTabs = {
+const playgroundTabs: Record<string, Omit<ComponentExample, 'Component'>> = {
   search: {
     icon: '⌕',
     label: 'Natural search',
@@ -60,6 +61,7 @@ const playgroundTabs = {
     eyebrow: '05 / EXTRACT',
     title: 'Less typing. More reviewing.',
   },
+  ...componentExamples,
 } as const;
 type PlaygroundTab = keyof typeof playgroundTabs;
 const tabIds = Object.keys(playgroundTabs) as PlaygroundTab[];
@@ -73,6 +75,7 @@ const liveTransport = createFetchTransport('/api/ai');
 function App() {
   const [tab, setTab] = useState<PlaygroundTab>('search');
   const activeTab = playgroundTabs[tab];
+  const ExtraExample = componentExamples[tab]?.Component;
   const [basePrompt, setBasePrompt] = useState('Be helpful, clear, and concise.');
   const [live, setLive] = useState(false);
   const [enabled, setEnabled] = useState(true);
@@ -146,7 +149,9 @@ function App() {
                 </div>
                 <span className="tag">{live ? 'Live endpoint' : 'Demo transport'}</span>
               </div>
-              {tab === 'search' ? (
+              {ExtraExample ? (
+                <ExtraExample />
+              ) : tab === 'search' ? (
                 <>
                   <p className="description">
                     Turn a natural-language query into validated invoice filters.

@@ -15,6 +15,19 @@ export const demoTransport: AITransport = {
       else signal.addEventListener('abort', abort, { once: true });
     });
     if (request.action === 'select') {
+      if (request.context?.selected) {
+        const text = request.text.toLowerCase();
+        return {
+          text: '',
+          data: {
+            values: [
+              /invoice|bill|charged/.test(text) ? 'billing' : '',
+              /login|log in/.test(text) ? 'account' : '',
+              /urgent/.test(text) ? 'urgent' : '',
+            ].filter(Boolean),
+          },
+        };
+      }
       const query = request.text.toLowerCase();
       const value = /bill|pay|invoice|money/.test(query)
         ? 'finance'

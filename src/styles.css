@@ -7,6 +7,7 @@
 }
 .aic-field > input,
 .aic-field > textarea,
+.aic-field > select,
 .aic-search input,
 .aic-assistant input,
 .aic-select select,
@@ -102,6 +103,24 @@
 }
 .aic-search button {
   white-space: nowrap;
+}
+.aic-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+}
+.aic-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--aic-border, #d7dcd5);
+  border-radius: 6px;
+}
+.aic-field > button {
+  margin: 8px 6px 0 0;
 }
 
 .aic-select-assistance {

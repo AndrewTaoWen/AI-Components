@@ -203,6 +203,10 @@ The transport contract is `AIRequest -> Promise<AIResponse>`. Actions are `compl
 
 ## Scope of v0.1
 
+### AITagInput
+
+Use `<AITagInput value={tags} onValueChange={setTags} options={allowedTags} text={content} />` to suggest tags from an approved list. Each option has `value`, `label`, and optional `description` / `disabled`. Optional `maxTags` limits additions; `name` emits repeated hidden form fields. Manual addition/removal works with AI disabled. The `select` action receives `context.options` and `context.selected`, and returns `{ text: '', data: { values: ['existing-tag'] } }`. Suggestions are deduplicated, validated, and added only when clicked. Keep option and controlled value references stable. The Tag input playground uses keyword-based mock suggestions.
+
 Included: shared providers, headless task lifecycle, input and textarea assistance, typed search validation, semantic select, reviewable form autofill, fetch transport, server handler, optional styles, playground, and regression tests. Not yet implemented: streaming, true inline ghost text, caching, model-vendor adapters, or hosted infrastructure.
 
 This is an initial framework, not a production-vetted release. Contributions should keep capabilities opt-in, prompts configurable, transports replaceable, and ordinary keyboard behavior intact.
