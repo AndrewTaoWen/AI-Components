@@ -8,6 +8,27 @@
 .aic-wrap {
   flex-wrap: wrap;
 }
+.aic-checkbox-options {
+  border: 0;
+  padding: 0;
+  margin: 0 0 18px;
+  display: grid;
+  gap: 12px;
+}
+.aic-checkbox-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aic-checkbox-options small {
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 3px;
+}
+.aic-checkbox-options legend {
+  padding: 0 0 12px;
+}
 .aic-mapping-rows {
   display: grid;
   gap: 12px;

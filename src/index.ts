@@ -10,6 +10,8 @@ export type { AISelectProps, AISelectOption } from './select.js';
 export { AIFormFill } from './form-fill.js';
 export type { AIFormFillProps, AIFormField } from './form-fill.js';
 export { useAITask } from './use-ai-task.js';
+export { AIMultiSelect } from './multi-select.js';
+export type { AIMultiSelectProps } from './multi-select.js';
 export { AIFieldMapper } from './field-mapper.js';
 export type { AIFieldMapperProps, AIFieldMapping } from './field-mapper.js';
 export { AIDateInput } from './date-input.js';

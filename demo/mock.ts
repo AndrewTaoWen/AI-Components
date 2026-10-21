@@ -15,6 +15,17 @@ export const demoTransport: AITransport = {
       else signal.addEventListener('abort', abort, { once: true });
     });
     if (request.action === 'select') {
+      if (request.context?.selectionMode === 'multi')
+        return {
+          text: '',
+          data: {
+            values: /design/i.test(request.text)
+              ? ['maya', 'noah']
+              : /engineer/i.test(request.text)
+                ? ['emma']
+                : [],
+          },
+        };
       if (request.context?.selected) {
         const text = request.text.toLowerCase();
         return {
