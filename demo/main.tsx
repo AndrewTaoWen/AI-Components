@@ -112,7 +112,7 @@ function App() {
               >
                 <span>{playgroundTabs[item].icon}</span>
                 {playgroundTabs[item].label}
-                <small>0{index + 1}</small>
+                <small>{String(index + 1).padStart(2, '0')}</small>
               </button>
             ))}
           </nav>

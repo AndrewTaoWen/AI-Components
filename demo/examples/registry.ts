@@ -10,8 +10,7 @@ export interface ComponentExample {
 
 const modules = import.meta.glob<{ default: ComponentExample }>('./*.tsx', { eager: true });
 export const componentExamples: Record<string, ComponentExample> = Object.fromEntries(
-  Object.entries(modules).map(([path, module]) => [
-    path.replace('./', '').replace('.tsx', ''),
-    module.default,
-  ]),
+  Object.entries(modules)
+    .sort(([, a], [, b]) => a.default.eyebrow.localeCompare(b.default.eyebrow))
+    .map(([path, module]) => [path.replace('./', '').replace('.tsx', ''), module.default]),
 );
