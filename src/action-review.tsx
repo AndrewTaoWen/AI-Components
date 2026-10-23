@@ -10,6 +10,7 @@ export interface AIActionReviewProps {
   onUndo?(): unknown;
   canUndo?: boolean;
   busy?: boolean;
+  disabled?: boolean;
   /** Keeps the attempted selection fixed after an uncertain execution failure. */
   retryPending?: boolean;
   error?: string;
@@ -17,6 +18,7 @@ export interface AIActionReviewProps {
 function ProposalReview({
   proposal,
   busy,
+  disabled,
   retryPending,
   onAccept,
   onDismiss,
@@ -37,7 +39,7 @@ function ProposalReview({
           ))}
         </ul>
       ) : null}
-      <fieldset disabled={busy || retryPending}>
+      <fieldset disabled={busy || disabled || retryPending}>
         <legend>Choose changes</legend>
         {proposal.steps.map((step) => (
           <label key={step.id}>
@@ -59,7 +61,7 @@ function ProposalReview({
       <div className="aic-action-buttons">
         <button
           type="button"
-          disabled={busy || !selected.length}
+          disabled={busy || disabled || !selected.length}
           onClick={() => onAccept(selected)}
         >
           {retryPending ? 'Retry selected action' : `Apply action (${selected.length})`}

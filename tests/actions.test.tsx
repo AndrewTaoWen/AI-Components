@@ -414,3 +414,17 @@ it('allows a fresh review after undo is definitively rejected by a newer revisio
     expect(result.current.review({ ...proposal, id: 'new-target-revision' })).toBe(true);
   });
 });
+
+it('does not duplicate a dismissal already projected from authoritative application history', () => {
+  const { result, memory } = setup();
+  act(() => {
+    memory.recordAction('project', {
+      type: 'checklist.update.dismissed',
+      data: { proposalId: proposal.id },
+    });
+  });
+  act(() => {
+    expect(result.current.dismiss()).toBe(true);
+  });
+  expect(memory.getSnapshot().actions).toHaveLength(1);
+});

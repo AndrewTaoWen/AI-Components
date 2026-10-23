@@ -43,6 +43,11 @@ export interface AIMemoryStore {
   clearAll(): void;
 }
 
+export interface AIHydratableMemoryStore extends AIMemoryStore {
+  /** Replace an authoritative projection atomically. Caller owns freshness and identity checks. */
+  replaceSnapshot(snapshot: AIMemorySnapshot): void;
+}
+
 const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const EMPTY_MEMORY: AIMemoryData = Object.freeze({});
 
@@ -58,7 +63,7 @@ export function createAIMemory(
     maxActions?: number;
     clock?: () => string;
   } = {},
-): AIMemoryStore {
+): AIHydratableMemoryStore {
   const maxActions = options.maxActions ?? 50;
   if (!Number.isInteger(maxActions) || maxActions < 0)
     throw new Error('maxActions must be a nonnegative integer.');
@@ -110,6 +115,11 @@ export function createAIMemory(
 
   return {
     getSnapshot: () => snapshot,
+    replaceSnapshot(value) {
+      const restored = restoreAIMemorySnapshot(value);
+      nextId = restored.nextActionId!;
+      publish(restored.scopes, maxActions === 0 ? [] : restored.actions.slice(-maxActions));
+    },
     subscribe(listener) {
       listeners.add(listener);
       return () => {
