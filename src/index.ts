@@ -1,4 +1,8 @@
 'use client';
+export { useAICompletion } from './use-ai-completion.js';
+export type { AICompletionOptions } from './use-ai-completion.js';
+export { AIInlineTextarea } from './inline-textarea.js';
+export type { AIInlineTextareaProps } from './inline-textarea.js';
 export { defineAIPolicy, evaluateAIPolicies, inspectAIRequest } from './prediction.js';
 export type {
   AIPredictionPolicy,
