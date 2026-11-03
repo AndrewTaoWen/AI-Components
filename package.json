@@ -51,6 +51,10 @@
     "./preferences": {
       "types": "./dist/preferences.d.ts",
       "import": "./dist/preferences.js"
+    },
+    "./facts": {
+      "types": "./dist/facts.d.ts",
+      "import": "./dist/facts.js"
     }
   },
   "scripts": {

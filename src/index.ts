@@ -1,4 +1,7 @@
 'use client';
+export { rememberAIFact, forgetAIFact, expireAIFacts, readAIFacts, fromFact } from './facts.js';
+export type { AIMemoryFact } from './facts.js';
+export { AIMemoryPanel, useAIFactExpiry } from './memory-panel.js';
 export {
   getAIPolicyPreference,
   setAIPolicyPreference,
