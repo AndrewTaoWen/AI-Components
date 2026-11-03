@@ -43,7 +43,7 @@ export async function offlineMeetingGenerator({
   if (!target || !/recap|circulate|what we agreed/i.test(note)) return [];
   return [
     {
-      id: `recap:${JSON.stringify([note, target.id, target.revision])}`,
+      id: `recap:${JSON.stringify([borrowed.sourceRevision, target.id, target.revision])}`,
       title: 'Share the meeting recap',
       steps: [
         {
