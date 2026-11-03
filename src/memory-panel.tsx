@@ -23,12 +23,18 @@ export function useAIFactExpiry(scope?: string) {
   const next = dates.length ? Math.min(...dates) : null;
   useEffect(() => {
     if (next === null) return;
-    const timer = setTimeout(
-      () => {
-        expireAIFacts(environment.memory, resolved);
-      },
-      Math.min(2_147_483_647, Math.max(0, next - Date.now())),
-    );
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      const remaining = next - Date.now();
+      timer = setTimeout(
+        () => {
+          if (next > Date.now()) schedule();
+          else expireAIFacts(environment.memory, resolved);
+        },
+        Math.min(2_147_483_647, Math.max(0, remaining)),
+      );
+    };
+    schedule();
     return () => clearTimeout(timer);
   }, [environment.memory, resolved, snapshot, next]);
 }

@@ -125,3 +125,26 @@ it('renders correction and scoped forgetting without touching another scope', ()
   expect(memory.getSnapshot().scopes.other.private).toBe('preserve');
   expect(memory.getSnapshot().scopes.shared).toBeUndefined();
 });
+
+it('rearms expiry beyond the native timer maximum', async () => {
+  vi.useFakeTimers();
+  const memory = createAIMemory();
+  rememberAIFact(memory, 'shared', {
+    id: 'long-lived',
+    value: 'Temporary',
+    source: { label: 'Test' },
+    confirmed: true,
+    expiresAt: new Date(Date.now() + 2_147_483_747).toISOString(),
+  });
+  renderHook(() => useAIFactExpiry(), {
+    wrapper: ({ children }) => <AIProvider memory={memory}>{children}</AIProvider>,
+  });
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(2_147_483_648);
+  });
+  expect(JSON.stringify(memory.getSnapshot())).toContain('long-lived');
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(100);
+  });
+  expect(JSON.stringify(memory.getSnapshot())).not.toContain('Temporary');
+});
