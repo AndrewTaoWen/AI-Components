@@ -6,3 +6,5 @@ demo-dist/
 !.env.example
 coverage/
 *.tsbuildinfo
+
+.data/
