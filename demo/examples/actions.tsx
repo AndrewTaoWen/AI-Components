@@ -81,6 +81,7 @@ function Workflow() {
   const list = checklist(memory.checklist);
   const action = useAIAction<Step, Receipt>({
     type: 'followup',
+    feedback: { policyId: 'support.followup' },
     source: 'workflow-actions-demo',
     validate(proposal) {
       const baseline = proposal.steps[0].payload;

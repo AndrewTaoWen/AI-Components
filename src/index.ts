@@ -1,4 +1,6 @@
 'use client';
+export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
+export type { AIWorkflowFeedback, AIFeedbackOutcome } from './feedback.js';
 export { defineAIPolicy, evaluateAIPolicies, inspectAIRequest } from './prediction.js';
 export type {
   AIPredictionPolicy,

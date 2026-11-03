@@ -43,6 +43,10 @@
     "./actions": {
       "types": "./dist/actions.d.ts",
       "import": "./dist/actions.js"
+    },
+    "./feedback": {
+      "types": "./dist/feedback.d.ts",
+      "import": "./dist/feedback.js"
     }
   },
   "scripts": {
