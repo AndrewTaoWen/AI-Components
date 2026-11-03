@@ -47,6 +47,10 @@
     "./feedback": {
       "types": "./dist/feedback.d.ts",
       "import": "./dist/feedback.js"
+    },
+    "./evaluation": {
+      "types": "./dist/evaluation.d.ts",
+      "import": "./dist/evaluation.js"
     }
   },
   "scripts": {
@@ -57,7 +61,8 @@
     "test": "vitest run",
     "prepack": "npm run build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "evaluate": "npm run build && node scripts/evaluate-workflows.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
