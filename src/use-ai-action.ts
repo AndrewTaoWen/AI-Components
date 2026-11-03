@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { recordAIFeedback, type AIWorkflowFeedback } from './feedback.js';
 import { useAI } from './provider.js';
 import { cloneAIMemoryValue, type AIMemoryStore, type AIMemoryValue } from './memory.js';
 
@@ -20,6 +21,7 @@ export interface AIActionOptions<T extends AIMemoryValue, R extends AIMemoryValu
   source?: string;
   scope?: string;
   enabled?: boolean;
+  feedback?: Pick<AIWorkflowFeedback, 'policyId' | 'sourceRevisions'>;
   /** Re-read authoritative state. The executor must also check revisions atomically. */
   validate(proposal: AIActionProposal<T>, selectedIds: readonly string[]): void | Promise<void>;
   execute(
@@ -79,6 +81,7 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
     undoId: string;
     undone: boolean;
     undoStarted: boolean;
+    feedback?: AIActionOptions<T, R>['feedback'];
   } | null>(null);
   const [proposal, setProposal] = useState<AIActionProposal<T> | null>(null);
   const [status, setStatus] = useState<Status>('idle');
@@ -161,6 +164,13 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
           )
       )
         throw new Error('This proposal already has a recorded outcome. Review a fresh proposal.');
+      if (options.feedback)
+        recordAIFeedback(binding.memory, binding.scope, {
+          ...options.feedback,
+          proposalId: next.id,
+          actionType: binding.type,
+          outcome: 'shown',
+        });
       reviewed.current = { proposal: next, options, binding };
       applied.current = null;
       setCanUndo(false);
@@ -179,6 +189,13 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
       return false;
     try {
       record(entry.binding, 'dismissed', { proposalId: entry.proposal.id });
+      if (entry.options.feedback)
+        recordAIFeedback(entry.binding.memory, entry.binding.scope, {
+          ...entry.options.feedback,
+          proposalId: entry.proposal.id,
+          actionType: entry.binding.type,
+          outcome: 'dismissed',
+        });
       reviewed.current = null;
       setProposal(null);
       setStatus('idle');
@@ -246,9 +263,19 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
         mutationId: transaction.mutationId,
         receipt,
       });
+      if (entry.options.feedback)
+        recordAIFeedback(entry.binding.memory, entry.binding.scope, {
+          ...entry.options.feedback,
+          proposalId: entry.proposal.id,
+          actionType: entry.binding.type,
+          outcome: 'accepted',
+          mutationId: transaction.mutationId,
+          selectedIds: transaction.selectedIds,
+        });
       if (visible(entry.binding)) {
         applied.current = {
           receipt,
+          feedback: entry.options.feedback,
           proposalId: entry.proposal.id,
           binding: entry.binding,
           undo: entry.options.undo,
@@ -292,6 +319,14 @@ export function useAIAction<T extends AIMemoryValue, R extends AIMemoryValue>(
         entry.undone = true;
       }
       record(entry.binding, 'undone', { proposalId: entry.proposalId, mutationId: entry.undoId });
+      if (entry.feedback)
+        recordAIFeedback(entry.binding.memory, entry.binding.scope, {
+          ...entry.feedback,
+          proposalId: entry.proposalId,
+          actionType: entry.binding.type,
+          outcome: 'undone',
+          mutationId: entry.undoId,
+        });
       if (visible(entry.binding)) {
         applied.current = null;
         setCanUndo(false);
