@@ -47,6 +47,10 @@
     "./feedback": {
       "types": "./dist/feedback.d.ts",
       "import": "./dist/feedback.js"
+    },
+    "./preferences": {
+      "types": "./dist/preferences.d.ts",
+      "import": "./dist/preferences.js"
     }
   },
   "scripts": {

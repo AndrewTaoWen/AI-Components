@@ -1,4 +1,12 @@
 'use client';
+export {
+  getAIPolicyPreference,
+  setAIPolicyPreference,
+  resetAIPolicyPreference,
+  evaluateAIPreferenceGate,
+} from './preferences.js';
+export type { AIPolicyPreference } from './preferences.js';
+export { AIPreferencePanel } from './preference-panel.js';
 export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
 export type { AIWorkflowFeedback, AIFeedbackOutcome } from './feedback.js';
 export { defineAIPolicy, evaluateAIPolicies, inspectAIRequest } from './prediction.js';
