@@ -8,6 +8,7 @@ import {
   fromFact,
   rememberAIFact,
   useAITask,
+  useAIMemory,
 } from '../../src/index.js';
 import type { ComponentExample } from './registry.js';
 const recipe = defineAIContext({
@@ -16,6 +17,7 @@ const recipe = defineAIContext({
   borrow: { company: fromFact('company') },
 });
 function Inspector() {
+  useAIMemory();
   const task = useAITask({ recipe });
   const [text, setText] = useState('Thanks for contacting our company.');
   return (
