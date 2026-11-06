@@ -6,6 +6,7 @@ export type {
 } from './use-ai-async-prediction.js';
 export { evaluateWorkflowCase, summarizeAIFeedback } from './evaluation.js';
 export type { AIWorkflowCase } from './evaluation.js';
+export { AIPreferencePanel } from './preference-panel.js';
 export {
   getAIPolicyPreference,
   setAIPolicyPreference,
