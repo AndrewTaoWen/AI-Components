@@ -1,3 +1,4 @@
+import { evaluateAIPreferenceGate } from './preferences.js';
 import { resolveAIContext, type AIContextRecipe } from './context-recipe.js';
 import { cloneAIMemoryValue, type AIMemorySnapshot, type AIMemoryValue } from './memory.js';
 import { validateAIActionProposal, type AIActionProposal } from './actions.js';
@@ -45,6 +46,7 @@ export function evaluateAIPolicies<T extends AIMemoryValue>(options: {
   scope: string;
   context?: Record<string, unknown>;
   maxPredictions?: number;
+  now?: number;
 }): AIPredictionResult<T> {
   const limit = options.maxPredictions ?? 20;
   if (!Number.isInteger(limit) || limit < 0)
@@ -56,6 +58,16 @@ export function evaluateAIPolicies<T extends AIMemoryValue>(options: {
   const seen = new Set<string>();
   for (const policy of options.policies) {
     try {
+      if (
+        !evaluateAIPreferenceGate(
+          options.snapshot,
+          options.scope,
+          policy.name,
+          undefined,
+          options.now,
+        ).allowed
+      )
+        continue;
       if (!policy.actionType.trim()) throw new Error('A prediction policy needs an action type.');
       const resolved = resolveAIContext(
         policy,
@@ -78,7 +90,17 @@ export function evaluateAIPolicies<T extends AIMemoryValue>(options: {
       );
       for (const proposal of proposals) {
         const key = `${policy.actionType}:${proposal.id}`;
-        if (seen.has(key)) continue;
+        if (
+          seen.has(key) ||
+          !evaluateAIPreferenceGate(
+            options.snapshot,
+            options.scope,
+            policy.name,
+            proposal.id,
+            options.now,
+          ).allowed
+        )
+          continue;
         seen.add(key);
         const reviewed = options.snapshot.actions.some(
           (event) =>

@@ -6,6 +6,13 @@ export type {
 } from './use-ai-async-prediction.js';
 export { evaluateWorkflowCase, summarizeAIFeedback } from './evaluation.js';
 export type { AIWorkflowCase } from './evaluation.js';
+export {
+  getAIPolicyPreference,
+  setAIPolicyPreference,
+  resetAIPolicyPreference,
+  evaluateAIPreferenceGate,
+} from './preferences.js';
+export type { AIPolicyPreference } from './preferences.js';
 export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
 export type { AIWorkflowFeedback, AIFeedbackOutcome } from './feedback.js';
 export { defineAIPolicy, evaluateAIPolicies, inspectAIRequest } from './prediction.js';
