@@ -1,4 +1,9 @@
 'use client';
+export { useAIAsyncPrediction } from './use-ai-async-prediction.js';
+export type {
+  AIAsyncPredictionOptions,
+  AIAsyncPredictionLimits,
+} from './use-ai-async-prediction.js';
 export { evaluateWorkflowCase, summarizeAIFeedback } from './evaluation.js';
 export type { AIWorkflowCase } from './evaluation.js';
 export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
