@@ -132,6 +132,12 @@ export const demoTransport: AITransport = {
         },
       };
     }
+    if (recipeContext?.recipe === 'support.inline') {
+      const customer = recipeContext.borrowed?.customer;
+      return {
+        text: ` We’ll review the invoice details for ${customer?.name ?? 'you'}${customer?.company ? ` at ${customer.company}` : ''}.`,
+      };
+    }
     if (request.action === 'complete')
       return { text: ' and let me know if you have any questions.' };
     const concise =
