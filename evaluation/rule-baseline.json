@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "mode": "rule-baseline",
+  "passed": 4,
+  "total": 5,
+  "results": [
+    {
+      "id": "explicit-action",
+      "passed": true,
+      "precision": 1,
+      "recall": 1,
+      "missing": [],
+      "unexpected": [],
+      "prohibited": [],
+      "duplicateSteps": 0,
+      "errors": []
+    },
+    {
+      "id": "paraphrased-action",
+      "passed": false,
+      "precision": 0,
+      "recall": 0,
+      "missing": ["send meeting recap"],
+      "unexpected": [],
+      "prohibited": [],
+      "duplicateSteps": 0,
+      "errors": []
+    },
+    {
+      "id": "irrelevant-note",
+      "passed": true,
+      "precision": 1,
+      "recall": 1,
+      "missing": [],
+      "unexpected": [],
+      "prohibited": [],
+      "duplicateSteps": 0,
+      "errors": []
+    },
+    {
+      "id": "no-eligible-target",
+      "passed": true,
+      "precision": 1,
+      "recall": 1,
+      "missing": [],
+      "unexpected": [],
+      "prohibited": [],
+      "duplicateSteps": 0,
+      "errors": []
+    },
+    {
+      "id": "other-workspace",
+      "passed": true,
+      "precision": 1,
+      "recall": 1,
+      "missing": [],
+      "unexpected": [],
+      "prohibited": [],
+      "duplicateSteps": 0,
+      "errors": []
+    }
+  ]
+}

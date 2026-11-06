@@ -47,6 +47,10 @@
     "./feedback": {
       "types": "./dist/feedback.d.ts",
       "import": "./dist/feedback.js"
+    },
+    "./evaluation": {
+      "types": "./dist/evaluation.d.ts",
+      "import": "./dist/evaluation.js"
     }
   },
   "scripts": {
@@ -57,7 +61,8 @@
     "test": "vitest run",
     "prepack": "npm run build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "evaluate": "npm run build && node scripts/evaluate-workflows.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -73,6 +78,7 @@
     "react-dom": "19.3.0",
     "typescript": "7.0.2",
     "vite": "8.3.4",
-    "vitest": "5.0.3"
+    "vitest": "5.0.3",
+    "@types/node": "^22.20.5"
   }
 }
