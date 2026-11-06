@@ -17,5 +17,5 @@ Coordinates update on selection, scrolling, resize and accepted text; long suffi
 the remaining line width. This first renderer does not show multiline completions, rich-text blocks,
 or insert ghost text into an existing word. Native handlers/refs and form behavior remain available.
 Custom fonts, RTL/bidi and mobile virtual keyboards should be tested for each application's styling;
-the renderer is not a rich-text editor integration.
-Explicit transport/server limits still control costs.
+the renderer is not a rich-text editor integration. The Inline completion playground uses synthetic
+accepted customer context for a support reply. Explicit transport/server limits still control costs.
