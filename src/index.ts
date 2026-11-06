@@ -17,6 +17,8 @@ export type { AIPolicyPreference } from './preferences.js';
 export { AIMemoryPanel, useAIFactExpiry } from './memory-panel.js';
 export { rememberAIFact, forgetAIFact, expireAIFacts, readAIFacts, fromFact } from './facts.js';
 export type { AIMemoryFact } from './facts.js';
+export { AIInlineTextarea } from './inline-textarea.js';
+export type { AIInlineTextareaProps } from './inline-textarea.js';
 export { useAICompletion } from './use-ai-completion.js';
 export type { AICompletionOptions } from './use-ai-completion.js';
 export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
