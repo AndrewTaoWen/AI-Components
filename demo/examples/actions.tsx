@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   AIActionReview,
+  AIPreferencePanel,
   AIContextInspector,
   defineAIPolicy,
   fromAction,
@@ -186,6 +187,7 @@ function Workflow() {
           {error.message}
         </p>
       ))}
+      <AIPreferencePanel policyId="support.followup" proposalId={action.proposal?.id} />
       <h3>Follow-up checklist</h3>
       <ul aria-label="Follow-up checklist">
         {list.rows.map((text, index) => (
