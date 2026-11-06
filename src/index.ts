@@ -14,6 +14,7 @@ export {
   evaluateAIPreferenceGate,
 } from './preferences.js';
 export type { AIPolicyPreference } from './preferences.js';
+export { AIMemoryPanel, useAIFactExpiry } from './memory-panel.js';
 export { rememberAIFact, forgetAIFact, expireAIFacts, readAIFacts, fromFact } from './facts.js';
 export type { AIMemoryFact } from './facts.js';
 export { recordAIFeedback, readAIFeedback, AI_FEEDBACK_OUTCOMES } from './feedback.js';
